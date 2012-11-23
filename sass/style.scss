@@ -49,6 +49,7 @@ body {
 	color: #222;
 }
 #main {
+	min-height: 100px;
 	border-radius: 3px;
 	@include box-shadow(1px 1px 0 1px black);
 	line-height: 2 * $baseline;
