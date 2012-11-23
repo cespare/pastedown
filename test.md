@@ -7,3 +7,9 @@ func blah() {
 	return foobar();
 }
 ```
+
+``` html
+<body>
+<p>asdfa asdfasd</p>
+</body>
+```
