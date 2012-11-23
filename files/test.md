@@ -12,6 +12,8 @@ field to find a reasonably good area.
 
 Let's light this fire one more time, Mike, and witness this great nation at its best.
 
+### Header 3
+
 The Earth is a very small stage in a vast cosmic arena. Think of the rivers of blood spilled by all those
 generals and emperors so that, in glory and triumph, they could become the momentary masters of a fraction of
 a dot. Think of the endless cruelties visited by the inhabitants of one corner of this pixel on the scarcely

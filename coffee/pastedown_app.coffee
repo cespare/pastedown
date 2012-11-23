@@ -1,4 +1,8 @@
 Pastedown =
+	init: ->
+		window.onhashchange = => @loadPastie()
+		@loadPastie()
+
 	spinnerOptions:
 		lines: 9, # The number of lines to draw
 		length: 0, # The length of each line
@@ -51,4 +55,4 @@ Pastedown =
 
 
 $ ->
-	Pastedown.loadPastie()
+	Pastedown.init()

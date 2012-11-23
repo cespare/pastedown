@@ -14,9 +14,14 @@ $baseline: 13px;
 	font-size: 60px;
 	height: 10 * $baseline;
 	line-height: 10 * $baseline;
-	font-family: "Yanone Kaffeesatz", sans-serif;
 	color: #eee;
+}
+
+#header, #footer {
+	font-family: "Yanone Kaffeesatz", sans-serif;
 	text-shadow: 1px 1px 0px black;
+	a { color: #eee; }
+	a:hover { text-decoration: none; }
 }
 
 #footer {
@@ -25,15 +30,7 @@ $baseline: 13px;
 	text-align: right;
 	margin: 0 auto;
 	font-size: 30px;
-	font-family: "Yanone Kaffeesatz", sans-serif;
-	text-shadow: 1px 1px 0px black;
 	padding-top: 5px;
-	a {
-		color: #eee;
-	}
-	a:hover {
-		text-decoration: none;
-	}
 }
 
 a {
