@@ -1,0 +1,118 @@
+@import "code";
+@import "vendor/bourbon/bourbon";
+
+* {
+	padding: 0;
+	margin: 0;
+}
+
+$pageWidth: 900px;
+$baseline: 13px;
+
+#header {
+	text-align: center;
+	font-size: 60px;
+	height: 10 * $baseline;
+	line-height: 10 * $baseline;
+	font-family: "Yanone Kaffeesatz", sans-serif;
+	color: #eee;
+	text-shadow: 1px 1px 0px black;
+}
+
+#footer {
+	height: 8 * $baseline;
+	width: $pageWidth;
+	text-align: right;
+	margin: 0 auto;
+	font-size: 30px;
+	font-family: "Yanone Kaffeesatz", sans-serif;
+	text-shadow: 1px 1px 0px black;
+	padding-top: 5px;
+	a {
+		color: #eee;
+	}
+	a:hover {
+		text-decoration: none;
+	}
+}
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+body {
+  font: 16px / 24px "Open Sans", sans-serif;
+	background-color: #333;
+	color: #222;
+}
+#main {
+	border-radius: 3px;
+	@include box-shadow(1px 1px 0 1px black);
+	line-height: 2 * $baseline;
+  width: $pageWidth;
+  margin: 0 auto;
+	padding: $baseline;
+	background-color: #efefef;
+	pre, code {
+		font-family: "Inconsolata", monospace;
+	}
+	h1, h2, h3, h4, h5 {
+		font-weight: normal;
+	}
+	h1 {
+		font-size: 40px;
+		padding-top: $baseline;
+		padding-bottom: 2 * $baseline;
+	}
+	h2 {
+		padding-top: $baseline;
+		font-size: 30px;
+		padding-bottom: 2 * $baseline;
+	}
+	h3 {
+		font-size: 26px;
+		padding-bottom: $baseline;
+	}
+	h4 {
+		font-size: 22px;
+		padding-bottom: $baseline;
+	}
+	h5 {
+		font-size: 18px;
+		padding-bottom: $baseline;
+	}
+	p {
+		padding-bottom: $baseline;
+	}
+	code {
+		padding: 2px;
+		background-color: #ddd;
+		border-radius: 3px;
+	}
+	blockquote {
+		color: #666;
+		border-left: 1px solid #999;
+		margin-bottom: $baseline;
+		padding-left: $baseline;
+		p:last-child {
+			padding-bottom: 0;
+		}
+	}
+	pre {
+		line-height: 2 * $baseline;
+		overflow-x: auto;
+		background-color: #ddd;
+		border-radius: 3px;
+		padding: $baseline;
+	}
+	.highlight {
+		padding-bottom: $baseline;
+	}
+	ul, ol {
+		padding-bottom: $baseline;
+		padding-left: 18px;
+	}
+}

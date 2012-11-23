@@ -3,21 +3,36 @@ package main
 import (
 	"bytes"
 	"github.com/cespare/blackfriday"
+	"github.com/cespare/go-apachelog"
+	"github.com/gorilla/pat"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 )
 
+const (
+	listenAddr = "localhost:8389"
+	staticDir  = "public"
+	pastieDir  = "files"
+	mainPastie = "about.md"
+	pygmentize = "./vendor/pygments/pygmentize"
+	viewFile   = "view.html"
+)
+
 var (
-	pygmentize         = "./vendor/pygments/pygmentize"
 	validLanguages     = make(map[string]struct{})
 	markdownRenderer   *blackfriday.Html
 	markdownExtensions int
+	viewHtml           []byte
 )
 
 func init() {
+	var err error
+
 	// Get the list of valid lexers from pygments.
 	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
 	if err != nil {
@@ -46,6 +61,24 @@ func init() {
 	markdownExtensions |= blackfriday.EXTENSION_TABLES
 	markdownExtensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
 	markdownExtensions |= blackfriday.EXTENSION_SPACE_HEADERS
+
+	// Check that the main info file exists.
+	_, err = os.Stat(pastieDir + "/" + mainPastie)
+	if err != nil {
+		log.Fatalln("Error with main info file: " + err.Error())
+	}
+
+	// Load in the main view template
+	viewTemplate, err := template.ParseFiles(viewFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	b := new(bytes.Buffer)
+	err = viewTemplate.Execute(b, struct{MainId string}{mainPastie})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	viewHtml = b.Bytes()
 }
 
 func syntaxHighlight(out io.Writer, in io.Reader, language string) {
@@ -59,11 +92,43 @@ func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 	pygmentsCommand.Run()
 }
 
-func main() {
-	contents, err := ioutil.ReadFile("test.md")
-	if err != nil {
-		panic(err)
+func pastieHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get(":id")
+	if len(id) == 0 {
+		http.Error(w, "No such file.", http.StatusNotFound)
+		return
 	}
-	output := blackfriday.Markdown(contents, markdownRenderer, markdownExtensions)
-	os.Stdout.Write(output)
+	contents, err := ioutil.ReadFile(pastieDir + "/" + id)
+	if err != nil {
+		http.Error(w, "No such file.", http.StatusNotFound)
+		return
+	}
+	w.Write(blackfriday.Markdown(contents, markdownRenderer, markdownExtensions))
+}
+
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	w.Write(viewHtml)
+}
+
+func main() {
+	mux := pat.New()
+
+	mux.Add("GET", "/favicon.ico", http.FileServer(http.Dir(staticDir)))
+	staticPath := "/"+staticDir+"/"
+	mux.Add("GET", staticPath, http.StripPrefix(staticPath, http.FileServer(http.Dir("./"+staticDir))))
+
+	mux.Get("/files/{id:[\\w\\.]+}", pastieHandler)
+	mux.Get("/", viewHandler)
+
+	handler := apachelog.NewHandler(mux, os.Stderr)
+	server := &http.Server{
+		Addr:    listenAddr,
+		Handler: handler,
+	}
+	log.Println("Now listening on", listenAddr)
+	log.Fatalf(server.ListenAndServe().Error())
 }
