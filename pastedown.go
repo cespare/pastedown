@@ -96,7 +96,7 @@ func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 	pygmentsCommand.Run()
 }
 
-type PreviewRequest struct {
+type Pastie struct {
 	Text   string `json:"text"`
 	Format string `json:"format"`
 }
@@ -147,19 +147,36 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(render(contents, extension))
 }
 
-func previewHandler(w http.ResponseWriter, r *http.Request) {
+func decodePastie(r *http.Request) (*Pastie, error) {
 	text, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Could not render preview text.", http.StatusInternalServerError)
-		return
+		return nil, err
 	}
-	preview := &PreviewRequest{}
-	err = json.Unmarshal(text, preview)
+	pastie := &Pastie{}
+	err = json.Unmarshal(text, pastie)
+	if err != nil {
+		return nil, err
+	}
+	return pastie, nil
+}
+
+func previewHandler(w http.ResponseWriter, r *http.Request) {
+	preview, err := decodePastie(r)
 	if err != nil {
 		http.Error(w, "Could not render preview text.", http.StatusInternalServerError)
 		return
 	}
 	w.Write(render([]byte(preview.Text), preview.Format))
+}
+
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	preview, err := decodePastie(r)
+	if err != nil {
+		http.Error(w, "Could not save text.", http.StatusInternalServerError)
+		return
+	}
+	_ = preview
+	w.Write([]byte("test.ruby"))
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -179,6 +196,7 @@ func main() {
 
 	mux.Get("/files/{id:[\\w\\.]+}", pastieHandler)
 	mux.Post("/preview", previewHandler)
+	mux.Put("/file", saveHandler)
 	mux.Get("/", viewHandler)
 
 	handler := apachelog.NewHandler(mux, os.Stderr)

@@ -2,8 +2,8 @@
 @import "vendor/bourbon/bourbon";
 
 * {
-	padding: 0;
-	margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 $pageWidth: 900px;
@@ -11,201 +11,257 @@ $baseline: 13px;
 $coreGreen: #15a226;
 
 .disabled {
-	pointer-events: none;
-	opacity: 0.5;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.no-focus-outline {
+  // FF
+  -moz-outline-style: none;
+  outline-style: none;
+  outline-width: 0px;
+  outline-color: -moz-use-text-color;
+  // Chrome
+  outline: none
 }
 
 #header {
-	text-align: center;
-	font-size: 60px;
-	height: 10 * $baseline;
-	line-height: 10 * $baseline;
-	color: #eee;
-	a { color: #eee; }
+  text-align: center;
+  font-size: 60px;
+  height: 10 * $baseline;
+  line-height: 10 * $baseline;
+  color: #eee;
+  a { color: #eee; }
 }
 
 #header, #footer {
-	font-family: "Yanone Kaffeesatz", sans-serif;
-	text-shadow: 1px 1px 0px black;
-	a:hover { text-decoration: none; }
+  font-family: "Yanone Kaffeesatz", sans-serif;
+  text-shadow: 1px 1px 0px black;
+  a:hover { text-decoration: none; }
 }
 
 #footer {
-	height: 8 * $baseline;
-	width: $pageWidth;
-	text-align: right;
-	margin: 0 auto;
-	font-size: 30px;
-	padding-top: 5px;
-	a { color: $coreGreen; }
+  height: 8 * $baseline;
+  width: $pageWidth;
+  text-align: right;
+  margin: 0 auto;
+  font-size: 30px;
+  padding-top: 5px;
+  a { color: $coreGreen; }
 }
 
 #controls {
-	$contentHeight: 35px;
-	$height: 80px;
-	height: $height;
-	width: 100%;
-	background-color: #ccc;
-	border-radius: 3px 3px 0 0;
-	@include display-box;
-	@include box-orient(horizontal);
-	font-size: 20px;
-	line-height: $contentHeight;
-	text-shadow: 1px 1px 0px #ddd;
-	input[type=radio] {
-		margin-left: 10px;
-		margin-right: 3px;
-	}
-	select {
-		font-size: 16px;
-		font-family: "Open Sans", sans-serif;
-	}
-	button {
-		display: inline-block;
-		font-size: 20px;
-		font-family: "Open Sans", sans-serif;
-		color: #efefef;
-		text-shadow: 1px 1px 0px #222;
-		height: $contentHeight;
-		width: 100px;
-		border-radius: 3px;
-		border: 1px solid darken($coreGreen, 10%);
-		@include background-image(linear-gradient(darken($coreGreen, 1%) 0%, darken($coreGreen, 6%) 100%));
-		@include box-shadow(inset 0 1px 0 0 lighten($coreGreen, 5%));
-		cursor: pointer;
-		&:hover {
-			@include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
-			@include box-shadow(inset 0 1px 0 0 $coreGreen);
-		}
-		&:active, &.selected {
-			@include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
-			@include box-shadow(inset 0 0 8px 4px darken($coreGreen, 15%));
-		}
-	}
-	#left, #right { padding-top: ($height - $contentHeight) / 2 }
-}
+  $contentHeight: 35px;
+  $height: 80px;
+  $buttonWidth: 100px;
+  $buttonSpacing: 5px;
+  $controlSpacing: 20px;
+  height: $height;
+  width: 100%;
+  background-color: #ccc;
+  border-radius: 3px 3px 0 0;
+  @include display-box;
+  @include box-orient(horizontal);
+  font-size: 20px;
+  line-height: $contentHeight;
+  text-shadow: 1px 1px 0px #ddd;
+  input[type=radio] {
+    margin-left: 10px;
+    margin-right: 3px;
+  }
+  select {
+    font-size: 16px;
+    font-family: "Open Sans", sans-serif;
+  }
+  button {
+    &:not(:last-child) {
+      margin-right: $buttonSpacing;
+    }
+    margin: 0;
+    display: inline-block;
+    font-size: 20px;
+    font-family: "Open Sans", sans-serif;
+    color: #efefef;
+    text-shadow: 1px 1px 0px #222;
+    height: $contentHeight;
+    width: $buttonWidth;
+    border-radius: 3px;
+    border: 1px solid darken($coreGreen, 10%);
+    @include background-image(linear-gradient(darken($coreGreen, 1%) 0%, darken($coreGreen, 6%) 100%));
+    @include box-shadow(inset 0 1px 0 0 lighten($coreGreen, 5%));
+    cursor: pointer;
+    &:hover {
+      @include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
+      @include box-shadow(inset 0 1px 0 0 $coreGreen);
+    }
+    &:active, &.selected {
+      @include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
+      @include box-shadow(inset 0 0 8px 4px darken($coreGreen, 15%));
+    }
+  }
+  #left, #right { padding-top: ($height - $contentHeight) / 2 }
 
-#left {
-	padding-left: 20px;
-	@include box-flex(1);
-}
+  #left {
+    position: relative;
+    padding-left: $controlSpacing;
+    @include box-flex(1);
+  }
 
-#right { padding-right: 20px; }
+  #right { padding-right: $controlSpacing; }
 
-#formatText {
+  #share-message {
+    $width: 250px;
+    position: absolute;
+    left: $controlSpacing + (2.5 * $buttonWidth) + (2 * $buttonSpacing) - (0.5 * $width);
+    top: $height - 10px;
+    background-color: #333;
+    color: #efefef;
+    opacity: 0.9;
+    text-shadow: 1px 1px 0px black;
+    width: $width;
+    border-radius: 3px;
+    text-align: center;
+    padding: 10px 0;
+    input[type=text] {
+      font-family: "Open Sans", sans-serif;
+      font-size: 16px;
+      border: none;
+      width: 200px;
+      background-color: #555;
+      color: #efefef;
+      text-shadow: 1px 1px 0px black;
+      border-radius: 3px;
+    }
+
+    // CSS arrow box magic due to http://cssarrowplease.com/
+    &:after {
+      pointer-events: none;
+      bottom: 100%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      border-bottom-color: #333;
+      border-width: 10px;
+      left: 50%;
+      margin-left: -10px;
+    }
+    display: none;
+  }
 }
 
 a {
   color: darken($coreGreen, 5%);
   text-decoration: none;
 }
-a:hover {
-  text-decoration: underline;
-}
+a:hover { text-decoration: underline; }
+
 body {
   font: 16px / 24px "Open Sans", sans-serif;
-	background-color: #333;
-	color: #222;
+  background-image: url("wild_oliva.png");
+  background-color: #333;
+  color: #222;
 }
 
 #main {
-	border-radius: 3px;
-	@include box-shadow(1px 1px 0 1px black);
+  border-radius: 3px;
+  @include box-shadow(1px 1px 0 1px black);
   width: $pageWidth;
   margin: 0 auto;
-	background-color: #efefef;
+  background-color: #efefef;
 }
 
 #spacer { padding: $baseline; }
 
 #edit-box {
-	font: 16px / 18px "Inconsolata", monospace;
-	$padding: 10px;
-	width: $pageWidth - ($baseline * 2) - ($padding * 2);
-	height: 500px;
-	border-radius: 3px;
-	resize: vertical;
-	border: none;
-	overflow: auto;
-	padding: $padding;
+  font: 16px / 18px "Inconsolata", monospace;
+  $padding: 10px;
+  width: $pageWidth - ($baseline * 2) - ($padding * 2);
+  height: 500px;
+  border-radius: 3px;
+  resize: vertical;
+  border: none;
+  overflow: auto;
+  padding: $padding;
 }
 
 #contents {
-	width: 100%;
-	min-height: 100px;
-	.error {
-		text-align: center;
-		font-style: italic;
-		line-height: 100px;
-		height: 100px;
-	}
-	&[data-format="plain-text"], &[data-format="code"] {
-		line-height: 20px;
-		font-family: "Inconsolata", monospace;
-		pre {
-			font-family: "Inconsolata", monospace;
-		}
-	}
-	&[data-format="markdown"] {
-		line-height: 2 * $baseline;
-		pre, code, {
-			font-family: "Inconsolata", monospace;
-		}
-		h1, h2, h3, h4, h5 {
-			font-weight: normal;
-		}
-		h1 {
-			font-size: 40px;
-			padding-top: $baseline;
-			padding-bottom: 2 * $baseline;
-		}
-		h2 {
-			padding-top: $baseline;
-			font-size: 30px;
-			padding-bottom: 2 * $baseline;
-		}
-		h3 {
-			font-size: 26px;
-			padding-bottom: $baseline;
-		}
-		h4 {
-			font-size: 22px;
-			padding-bottom: $baseline;
-		}
-		h5 {
-			font-size: 18px;
-			padding-bottom: $baseline;
-		}
-		p {
-			padding-bottom: $baseline;
-		}
-		code {
-			padding: 2px;
-			background-color: #ddd;
-			border-radius: 3px;
-		}
-		blockquote {
-			color: #666;
-			border-left: 1px solid #999;
-			margin-bottom: $baseline;
-			padding-left: $baseline;
-			p:last-child {
-				padding-bottom: 0;
-			}
-		}
-		pre {
-			line-height: 2 * $baseline;
-			overflow-x: auto;
-			background-color: #ddd;
-			border-radius: 3px;
-			padding: $baseline;
-		}
-		.highlight {
-			padding-bottom: $baseline;
-		}
-		ul, ol {
-			padding-bottom: $baseline;
-			padding-left: 18px;
-		}
-	}
+  width: 100%;
+  min-height: 100px;
+  .error {
+    text-align: center;
+    font-style: italic;
+    line-height: 100px;
+    height: 100px;
+  }
+  &[data-format="plain-text"], &[data-format="code"] {
+    line-height: 20px;
+    font-family: "Inconsolata", monospace;
+    pre {
+      font-family: "Inconsolata", monospace;
+    }
+  }
+  &[data-format="markdown"] {
+    line-height: 2 * $baseline;
+    pre, code, {
+      font-family: "Inconsolata", monospace;
+    }
+    h1, h2, h3, h4, h5 {
+      font-weight: normal;
+    }
+    h1 {
+      font-size: 40px;
+      padding-top: $baseline;
+      padding-bottom: 2 * $baseline;
+    }
+    h2 {
+      padding-top: $baseline;
+      font-size: 30px;
+      padding-bottom: 2 * $baseline;
+    }
+    h3 {
+      font-size: 26px;
+      padding-bottom: $baseline;
+    }
+    h4 {
+      font-size: 22px;
+      padding-bottom: $baseline;
+    }
+    h5 {
+      font-size: 18px;
+      padding-bottom: $baseline;
+    }
+    p {
+      padding-bottom: $baseline;
+    }
+    code {
+      padding: 2px;
+      background-color: #ddd;
+      border-radius: 3px;
+    }
+    blockquote {
+      color: #666;
+      border-left: 1px solid #999;
+      margin-bottom: $baseline;
+      padding-left: $baseline;
+      p:last-child {
+        padding-bottom: 0;
+      }
+    }
+    pre {
+      line-height: 2 * $baseline;
+      overflow-x: auto;
+      background-color: #ddd;
+      border-radius: 3px;
+      padding: $baseline;
+    }
+    .highlight {
+      padding-bottom: $baseline;
+    }
+    ul, ol {
+      padding-bottom: $baseline;
+      padding-left: 18px;
+    }
+  }
 }

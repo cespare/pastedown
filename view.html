@@ -12,78 +12,79 @@
 <title>Pastedown</title>
 </head>
 <body data-main-id="{{.MainId}}">
-	<section id="header"><a href="/#{{.MainId}}">Pastedown</a></section>
-	<section id="main">
-		<section id="controls" class="disabled">
-			<div id="left">
-				<button id="view" class="selected">view</button>
-				<button id="edit">edit</button>
-				<button id="share">share</button>
-			</div>
-			<div id="right">
-				<div id="formatText">
-					Format: <span id="format"></span>
-				</div>
-				<div id="formatChoice" style="display: none">
-					<label><input type="radio" name="format" value="markdown">markdown</label>
-					<label><input type="radio" name="format" value="text">plain text</label>
-					<label><input type="radio" name="format" value="code">code</label>
-					<select id="language">
-						<option value=""></option>
-						<option value="as">ActionScript</option>
-						<option value="c">C</option>
-						<option value="cl">Common Lisp</option>
-						<option value="coffeescript">Coffeescript</option>
-						<option value="cpp">C++</option>
-						<option value="csharp">C#</option>
-						<option value="css">CSS</option>
-						<option value="d">D</option>
-						<option value="dart">Dart</option>
-						<option value="diff">Diff</option>
-						<option value="erb">ERB</option>
-						<option value="erlang">Erlang</option>
-						<option value="fortran">Fortran</option>
-						<option value="fsharp">F#</option>
-						<option value="go">Go</option>
-						<option value="groovy">Groovy</option>
-						<option value="haml">Haml</option>
-						<option value="hs">Haskell</option>
-						<option value="html">HTML</option>
-						<option value="java">Java</option>
-						<option value="json">JSON</option>
-						<option value="lua">Lua</option>
-						<option value="make">Makefile</option>
-						<option value="matlab">Matlab</option>
-						<option value="mxml">MXML</option>
-						<option value="objc">Objective-C</option>
-						<option value="ocaml">OCaml</option>
-						<option value="php">PHP</option>
-						<option value="pl">Perl</option>
-						<option value="properties">Properties</option>
-						<option value="protobuf">Protocol Buffer</option>
-						<option value="python">Python</option>
-						<option value="rkt">Racket</option>
-						<option value="ruby">Ruby</option>
-						<option value="rust">Rust</option>
-						<option value="sass">Sass</option>
-						<option value="scala">Scala</option>
-						<option value="scheme">Scheme</option>
-						<option value="scss">SCSS</option>
-						<option value="sh">Shell</option>
-						<option value="sml">Standard ML</option>
-						<option value="sql">SQL</option>
-						<option value="tcl">Tcl</option>
-						<option value="tex">TeX</option>
-						<option value="vala">Vala</option>
-						<option value="vim">VimL</option>
-						<option value="xml">XML</option>
-						<option value="yaml">YAML</option>
-					</select>
-				</div>
-			</div>
-		</section>
-		<div id="spacer"><section id="contents"></section></div>
-	</section>
-	<section id="footer"><a href="https://github.com/cespare/pastedown">code@github</a></section>
+  <section id="header"><a href="/#{{.MainId}}">Pastedown</a></section>
+  <section id="main">
+    <section id="controls" class="disabled">
+      <div id="left">
+        <button id="view" class="selected">view
+          </button><button id="edit">edit
+          </button><button id="share">share
+        </button><div id="share-message"></div>
+      </div>
+      <div id="right">
+        <div id="formatText">
+          Format: <span id="format"></span>
+        </div>
+        <div id="formatChoice" style="display: none">
+          <label><input type="radio" name="format" value="markdown">markdown</label>
+          <label><input type="radio" name="format" value="text">plain text</label>
+          <label><input type="radio" name="format" value="code">code</label>
+          <select id="language">
+            <option value=""></option>
+            <option value="as">ActionScript</option>
+            <option value="c">C</option>
+            <option value="cl">Common Lisp</option>
+            <option value="coffeescript">Coffeescript</option>
+            <option value="cpp">C++</option>
+            <option value="csharp">C#</option>
+            <option value="css">CSS</option>
+            <option value="d">D</option>
+            <option value="dart">Dart</option>
+            <option value="diff">Diff</option>
+            <option value="erb">ERB</option>
+            <option value="erlang">Erlang</option>
+            <option value="fortran">Fortran</option>
+            <option value="fsharp">F#</option>
+            <option value="go">Go</option>
+            <option value="groovy">Groovy</option>
+            <option value="haml">Haml</option>
+            <option value="hs">Haskell</option>
+            <option value="html">HTML</option>
+            <option value="java">Java</option>
+            <option value="json">JSON</option>
+            <option value="lua">Lua</option>
+            <option value="make">Makefile</option>
+            <option value="matlab">Matlab</option>
+            <option value="mxml">MXML</option>
+            <option value="objc">Objective-C</option>
+            <option value="ocaml">OCaml</option>
+            <option value="php">PHP</option>
+            <option value="pl">Perl</option>
+            <option value="properties">Properties</option>
+            <option value="protobuf">Protocol Buffer</option>
+            <option value="python">Python</option>
+            <option value="rkt">Racket</option>
+            <option value="ruby">Ruby</option>
+            <option value="rust">Rust</option>
+            <option value="sass">Sass</option>
+            <option value="scala">Scala</option>
+            <option value="scheme">Scheme</option>
+            <option value="scss">SCSS</option>
+            <option value="sh">Shell</option>
+            <option value="sml">Standard ML</option>
+            <option value="sql">SQL</option>
+            <option value="tcl">Tcl</option>
+            <option value="tex">TeX</option>
+            <option value="vala">Vala</option>
+            <option value="vim">VimL</option>
+            <option value="xml">XML</option>
+            <option value="yaml">YAML</option>
+          </select>
+        </div>
+      </div>
+    </section>
+    <div id="spacer"><section id="contents"></section></div>
+  </section>
+  <section id="footer"><a href="https://github.com/cespare/pastedown">code@github</a></section>
 </body>
 </html>
