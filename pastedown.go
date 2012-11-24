@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/cespare/blackfriday"
 	"github.com/cespare/go-apachelog"
 	"github.com/gorilla/pat"
+
+	"bytes"
+	"encoding/json"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -32,11 +33,6 @@ var (
 	markdownExtensions int
 	viewHtml           []byte
 )
-
-type Pastie struct {
-	Contents string `json:"contents"`
-	Format   string `json:"format"`
-}
 
 func init() {
 	var err error
@@ -100,11 +96,32 @@ func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 	pygmentsCommand.Run()
 }
 
+type PreviewRequest struct {
+	Text   string `json:"text"`
+	Format string `json:"format"`
+}
+
+func render(text []byte, format string) []byte {
+	var rendered []byte
+	switch format {
+	case "text":
+		rendered = text
+	case "markdown":
+		rendered = blackfriday.Markdown(text, markdownRenderer, markdownExtensions)
+	default:
+		var highlighted bytes.Buffer
+		in := bytes.NewBuffer(text)
+		syntaxHighlight(&highlighted, in, format)
+		rendered = highlighted.Bytes()
+	}
+	return rendered
+}
+
 func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(0 * time.Second)
 	id := r.URL.Query().Get(":id")
 	if len(id) == 0 {
-		http.Error(w, "No such file.", http.StatusNotFound)
+		http.Error(w, "No such file.", http.StatusInternalServerError)
 		return
 	}
 	contents, err := ioutil.ReadFile(pastieDir + "/" + id)
@@ -112,6 +129,14 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No such file.", http.StatusNotFound)
 		return
 	}
+
+	// Just return the raw contents if ?rendered=true wasn't set.
+	if r.URL.Query().Get("rendered") != "true" {
+		w.Write(contents)
+		return
+	}
+
+	// Otherwise, render the proper format according to the extension.
 	extension := path.Ext(id)
 	if extension == "" {
 		extension = "text"
@@ -119,26 +144,22 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		extension = extension[1:]
 	}
 
-	var rendered string
-	switch extension {
-	case "text":
-		rendered = string(contents)
-	case "markdown":
-		rendered = string(blackfriday.Markdown(contents, markdownRenderer, markdownExtensions))
-	default:
-		var highlighted bytes.Buffer
-		in := bytes.NewBuffer(contents)
-		syntaxHighlight(&highlighted, in, extension)
-		rendered = highlighted.String()
-	}
-	message := &Pastie{rendered, extension}
-	encoded, err := json.Marshal(message)
+	w.Write(render(contents, extension))
+}
+
+func previewHandler(w http.ResponseWriter, r *http.Request) {
+	text, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Error encoding message.", http.StatusInternalServerError)
+		http.Error(w, "Could not render preview text.", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(encoded)
+	preview := &PreviewRequest{}
+	err = json.Unmarshal(text, preview)
+	if err != nil {
+		http.Error(w, "Could not render preview text.", http.StatusInternalServerError)
+		return
+	}
+	w.Write(render([]byte(preview.Text), preview.Format))
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -157,6 +178,7 @@ func main() {
 	mux.Add("GET", staticPath, http.StripPrefix(staticPath, http.FileServer(http.Dir("./"+staticDir))))
 
 	mux.Get("/files/{id:[\\w\\.]+}", pastieHandler)
+	mux.Post("/preview", previewHandler)
 	mux.Get("/", viewHandler)
 
 	handler := apachelog.NewHandler(mux, os.Stderr)

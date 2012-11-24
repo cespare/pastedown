@@ -10,9 +10,6 @@ $pageWidth: 900px;
 $baseline: 13px;
 $coreGreen: #15a226;
 
-::selection { background: lighten($coreGreen, 40%); }
-::-moz-selection { background: lighten($coreGreen, 40%); }
-
 .disabled {
 	pointer-events: none;
 	opacity: 0.5;
@@ -58,6 +55,10 @@ $coreGreen: #15a226;
 	input[type=radio] {
 		margin-left: 10px;
 		margin-right: 3px;
+	}
+	select {
+		font-size: 16px;
+		font-family: "Open Sans", sans-serif;
 	}
 	button {
 		display: inline-block;
@@ -109,13 +110,25 @@ body {
 
 #main {
 	border-radius: 3px;
-	@include box-shadow(1px 1px 0 1px $coreGreen);
+	@include box-shadow(1px 1px 0 1px black);
   width: $pageWidth;
   margin: 0 auto;
 	background-color: #efefef;
 }
 
 #spacer { padding: $baseline; }
+
+#edit-box {
+	font: 16px / 18px "Inconsolata", monospace;
+	$padding: 10px;
+	width: $pageWidth - ($baseline * 2) - ($padding * 2);
+	height: 500px;
+	border-radius: 3px;
+	resize: vertical;
+	border: none;
+	overflow: auto;
+	padding: $padding;
+}
 
 #contents {
 	width: 100%;
