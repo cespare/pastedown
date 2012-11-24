@@ -14,6 +14,30 @@
 <body data-main-id="{{.MainId}}">
 	<section id="header"><a href="/#{{.MainId}}">Pastedown</a></section>
 	<section id="main">
+		<section id="controls" class="disabled">
+			<div id="left">
+				<button id="view" class="selected">view</button>
+				<button id="edit">edit</button>
+				<button id="share">share</button>
+			</div>
+			<div id="right">
+				<div id="formatText">
+					Format: <span id="format"></span>
+				</div>
+				<div id="formatChoice" style="display: none">
+					<label><input type="radio" name="format" value="markdown">markdown</label>
+					<label><input type="radio" name="format" value="text">plain text</label>
+					<label><input type="radio" name="format" value="code">code</label>
+					<select id="language">
+						<option value=""></option>
+						<option value="c">C</option>
+						<option value="c++">C++</option>
+						<option value="java">Java</option>
+					</select>
+				</div>
+			</div>
+		</section>
+		<div id="spacer"><section id="contents"></section></div>
 	</section>
 	<section id="footer"><a href="https://github.com/cespare/pastedown">code@github</a></section>
 </body>

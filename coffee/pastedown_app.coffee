@@ -21,10 +21,7 @@ Pastedown =
 		left: "auto" # Left position relative to parent in px
 
 	startSpinner: ->
-		if @spinner?
-			@spinner.spin()
-			return
-		target = $("#main")[0]
+		target = $("#contents")[0]
 		@spinner = new Spinner(@spinnerOptions).spin(target)
 
 	stopSpinner: ->
@@ -32,6 +29,8 @@ Pastedown =
 
 	# Load the pastie specified in the URL fragment.
 	loadPastie: ->
+		$("#controls").addClass("disabled")
+		$("#contents").empty()
 		@startSpinner()
 		id = window.location.hash[1..]
 		if id == ""
@@ -40,19 +39,34 @@ Pastedown =
 		$.ajax
 			method: "get"
 			url: "/files/#{id}"
+			contentType: "json"
 			success: (data, textStatus, jqXHR) => @onSuccess(data, textStatus, jqXHR)
 			error: (jqXHR, textStatus, errorThrown) => @onError(jqXHR, textStatus, errorThrown)
 
 	# Replace the current content with a new page
 	onSuccess: (data, textStatus, jqXHR) ->
 		@stopSpinner()
-		$("#main").html(data)
+		$("#controls").removeClass("disabled")
+		switch(data.format)
+			when "text"
+				$text = $("<pre></pre>")
+				$text.html(data.contents)
+				$("#contents").html($text)
+				$("#contents").attr("data-format", "plain-text")
+				$("#format").html("plain text")
+			when "markdown"
+				$("#contents").html(data.contents)
+				$("#contents").attr("data-format", "markdown")
+				$("#format").html(data.format)
+			else
+				$("#contents").html(data.contents)
+				$("#contents").attr("data-format", "code")
+				$("#format").html("code (#{data.format})")
 
 	# Show an error with the page loading.
 	onError: (jqXHR, textStatus, errorThrown) ->
 		@stopSpinner()
-		$("#main").html("<em>Error loading file.</em>")
-
+		$("#contents").html("<div class='error'>Error loading file.</div>")
 
 $ ->
 	Pastedown.init()

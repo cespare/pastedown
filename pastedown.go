@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/cespare/blackfriday"
 	"github.com/cespare/go-apachelog"
 	"github.com/gorilla/pat"
@@ -12,13 +13,15 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
+	"time"
 )
 
 const (
 	listenAddr = "localhost:8389"
 	staticDir  = "public"
 	pastieDir  = "files"
-	mainPastie = "about.md"
+	mainPastie = "about.markdown"
 	pygmentize = "./vendor/pygments/pygmentize"
 	viewFile   = "view.html"
 )
@@ -29,6 +32,11 @@ var (
 	markdownExtensions int
 	viewHtml           []byte
 )
+
+type Pastie struct {
+	Contents string `json:"contents"`
+	Format   string `json:"format"`
+}
 
 func init() {
 	var err error
@@ -74,7 +82,7 @@ func init() {
 		log.Fatalln(err)
 	}
 	b := new(bytes.Buffer)
-	err = viewTemplate.Execute(b, struct{MainId string}{mainPastie})
+	err = viewTemplate.Execute(b, struct{ MainId string }{mainPastie})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -93,6 +101,7 @@ func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 }
 
 func pastieHandler(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(0 * time.Second)
 	id := r.URL.Query().Get(":id")
 	if len(id) == 0 {
 		http.Error(w, "No such file.", http.StatusNotFound)
@@ -103,7 +112,33 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No such file.", http.StatusNotFound)
 		return
 	}
-	w.Write(blackfriday.Markdown(contents, markdownRenderer, markdownExtensions))
+	extension := path.Ext(id)
+	if extension == "" {
+		extension = "text"
+	} else {
+		extension = extension[1:]
+	}
+
+	var rendered string
+	switch extension {
+	case "text":
+		rendered = string(contents)
+	case "markdown":
+		rendered = string(blackfriday.Markdown(contents, markdownRenderer, markdownExtensions))
+	default:
+		var highlighted bytes.Buffer
+		in := bytes.NewBuffer(contents)
+		syntaxHighlight(&highlighted, in, extension)
+		rendered = highlighted.String()
+	}
+	message := &Pastie{rendered, extension}
+	encoded, err := json.Marshal(message)
+	if err != nil {
+		http.Error(w, "Error encoding message.", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(encoded)
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +153,7 @@ func main() {
 	mux := pat.New()
 
 	mux.Add("GET", "/favicon.ico", http.FileServer(http.Dir(staticDir)))
-	staticPath := "/"+staticDir+"/"
+	staticPath := "/" + staticDir + "/"
 	mux.Add("GET", staticPath, http.StripPrefix(staticPath, http.FileServer(http.Dir("./"+staticDir))))
 
 	mux.Get("/files/{id:[\\w\\.]+}", pastieHandler)

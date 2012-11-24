@@ -8,6 +8,15 @@
 
 $pageWidth: 900px;
 $baseline: 13px;
+$coreGreen: #15a226;
+
+::selection { background: lighten($coreGreen, 40%); }
+::-moz-selection { background: lighten($coreGreen, 40%); }
+
+.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+}
 
 #header {
 	text-align: center;
@@ -15,12 +24,12 @@ $baseline: 13px;
 	height: 10 * $baseline;
 	line-height: 10 * $baseline;
 	color: #eee;
+	a { color: #eee; }
 }
 
 #header, #footer {
 	font-family: "Yanone Kaffeesatz", sans-serif;
 	text-shadow: 1px 1px 0px black;
-	a { color: #eee; }
 	a:hover { text-decoration: none; }
 }
 
@@ -31,10 +40,62 @@ $baseline: 13px;
 	margin: 0 auto;
 	font-size: 30px;
 	padding-top: 5px;
+	a { color: $coreGreen; }
+}
+
+#controls {
+	$contentHeight: 35px;
+	$height: 80px;
+	height: $height;
+	width: 100%;
+	background-color: #ccc;
+	border-radius: 3px 3px 0 0;
+	@include display-box;
+	@include box-orient(horizontal);
+	font-size: 20px;
+	line-height: $contentHeight;
+	text-shadow: 1px 1px 0px #ddd;
+	input[type=radio] {
+		margin-left: 10px;
+		margin-right: 3px;
+	}
+	button {
+		display: inline-block;
+		font-size: 20px;
+		font-family: "Open Sans", sans-serif;
+		color: #efefef;
+		text-shadow: 1px 1px 0px #222;
+		height: $contentHeight;
+		width: 100px;
+		border-radius: 3px;
+		border: 1px solid darken($coreGreen, 10%);
+		@include background-image(linear-gradient(darken($coreGreen, 1%) 0%, darken($coreGreen, 6%) 100%));
+		@include box-shadow(inset 0 1px 0 0 lighten($coreGreen, 5%));
+		cursor: pointer;
+		&:hover {
+			@include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
+			@include box-shadow(inset 0 1px 0 0 $coreGreen);
+		}
+		&:active, &.selected {
+			@include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
+			@include box-shadow(inset 0 0 8px 4px darken($coreGreen, 15%));
+		}
+	}
+	#left, #right { padding-top: ($height - $contentHeight) / 2 }
+}
+
+#left {
+	padding-left: 20px;
+	@include box-flex(1);
+}
+
+#right { padding-right: 20px; }
+
+#formatText {
 }
 
 a {
-  color: #4183C4;
+  color: darken($coreGreen, 5%);
   text-decoration: none;
 }
 a:hover {
@@ -45,72 +106,93 @@ body {
 	background-color: #333;
 	color: #222;
 }
+
 #main {
-	min-height: 100px;
 	border-radius: 3px;
-	@include box-shadow(1px 1px 0 1px black);
-	line-height: 2 * $baseline;
+	@include box-shadow(1px 1px 0 1px $coreGreen);
   width: $pageWidth;
   margin: 0 auto;
-	padding: $baseline;
 	background-color: #efefef;
-	pre, code {
+}
+
+#spacer { padding: $baseline; }
+
+#contents {
+	width: 100%;
+	min-height: 100px;
+	.error {
+		text-align: center;
+		font-style: italic;
+		line-height: 100px;
+		height: 100px;
+	}
+	&[data-format="plain-text"], &[data-format="code"] {
+		line-height: 20px;
 		font-family: "Inconsolata", monospace;
-	}
-	h1, h2, h3, h4, h5 {
-		font-weight: normal;
-	}
-	h1 {
-		font-size: 40px;
-		padding-top: $baseline;
-		padding-bottom: 2 * $baseline;
-	}
-	h2 {
-		padding-top: $baseline;
-		font-size: 30px;
-		padding-bottom: 2 * $baseline;
-	}
-	h3 {
-		font-size: 26px;
-		padding-bottom: $baseline;
-	}
-	h4 {
-		font-size: 22px;
-		padding-bottom: $baseline;
-	}
-	h5 {
-		font-size: 18px;
-		padding-bottom: $baseline;
-	}
-	p {
-		padding-bottom: $baseline;
-	}
-	code {
-		padding: 2px;
-		background-color: #ddd;
-		border-radius: 3px;
-	}
-	blockquote {
-		color: #666;
-		border-left: 1px solid #999;
-		margin-bottom: $baseline;
-		padding-left: $baseline;
-		p:last-child {
-			padding-bottom: 0;
+		pre {
+			font-family: "Inconsolata", monospace;
 		}
 	}
-	pre {
+	&[data-format="markdown"] {
 		line-height: 2 * $baseline;
-		overflow-x: auto;
-		background-color: #ddd;
-		border-radius: 3px;
-		padding: $baseline;
-	}
-	.highlight {
-		padding-bottom: $baseline;
-	}
-	ul, ol {
-		padding-bottom: $baseline;
-		padding-left: 18px;
+		pre, code, {
+			font-family: "Inconsolata", monospace;
+		}
+		h1, h2, h3, h4, h5 {
+			font-weight: normal;
+		}
+		h1 {
+			font-size: 40px;
+			padding-top: $baseline;
+			padding-bottom: 2 * $baseline;
+		}
+		h2 {
+			padding-top: $baseline;
+			font-size: 30px;
+			padding-bottom: 2 * $baseline;
+		}
+		h3 {
+			font-size: 26px;
+			padding-bottom: $baseline;
+		}
+		h4 {
+			font-size: 22px;
+			padding-bottom: $baseline;
+		}
+		h5 {
+			font-size: 18px;
+			padding-bottom: $baseline;
+		}
+		p {
+			padding-bottom: $baseline;
+		}
+		code {
+			padding: 2px;
+			background-color: #ddd;
+			border-radius: 3px;
+		}
+		blockquote {
+			color: #666;
+			border-left: 1px solid #999;
+			margin-bottom: $baseline;
+			padding-left: $baseline;
+			p:last-child {
+				padding-bottom: 0;
+			}
+		}
+		pre {
+			line-height: 2 * $baseline;
+			overflow-x: auto;
+			background-color: #ddd;
+			border-radius: 3px;
+			padding: $baseline;
+		}
+		.highlight {
+			padding-bottom: $baseline;
+		}
+		ul, ol {
+			padding-bottom: $baseline;
+			padding-left: 18px;
+		}
 	}
 }
