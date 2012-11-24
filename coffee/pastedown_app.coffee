@@ -213,13 +213,18 @@ window.Pastedown =
       $("#view").click()
       return
 
+    if @editBoxDirty and @editBoxContents != ""
+      text = @editBoxContents
+    else
+      text = $("#edit-box").val()
+
     $("#controls").addClass("disabled")
     $("#contents").addClass("disabled")
     @startSpinner()
     $.ajax
       type: "put"
       url: "/file"
-      data: JSON.stringify(text: $("#edit-box").val(), format: @currentFormat())
+      data: JSON.stringify(text: text, format: @currentFormat())
       success: (data, textStatus, jqXHR) => @onShareSuccess(data, textStatus, jqXHR)
       error: (jqXHR, textStatus, errorThrown) => @onShareError(jqXHR, textStatus, errorThrown)
 
