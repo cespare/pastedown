@@ -22,12 +22,14 @@ import (
 )
 
 const (
-	listenAddr = "localhost:8389"
-	staticDir  = "public"
-	pastieDir  = "files"
-	mainPastie = "about.markdown"
-	pygmentize = "./vendor/pygments/pygmentize"
-	viewFile   = "view.html"
+	listenAddr                 = "localhost:8389"
+	staticDir                  = "public"
+	pastieDir                  = "files"
+	mainPastie                 = "about.markdown"
+	pygmentize                 = "./vendor/pygments/pygmentize"
+	viewFile                   = "view.html"
+	expirationTimeHours        = 7 * 24
+	expirationCheckPeriodHours = 1
 )
 
 var (
@@ -121,6 +123,9 @@ func render(text []byte, format string) []byte {
 	return rendered
 }
 
+// Update the mtime
+func touch(path string) { os.Chtimes(path, time.Now(), time.Now()) }
+
 func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(0 * time.Second)
 	id := r.URL.Query().Get(":id")
@@ -136,6 +141,7 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		filename = path.Join(pastieDir, id)
 	}
+	touch(filename)
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		http.Error(w, "No such file.", http.StatusNotFound)
@@ -213,7 +219,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err = os.Stat(filename)
-	if err != nil {
+	if err == nil {
+		log.Println("Request for existing pastie: " + filename)
+		touch(filename)
+	} else {
+		log.Println("Saving new pastie: " + filename)
 		err = ioutil.WriteFile(filename, bytes, 0666)
 		if err != nil {
 			log.Println("Error writing pastie file: " + err.Error())
@@ -233,7 +243,59 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(viewHtml)
 }
 
+func expire() {
+	log.Println("Expiring files...")
+	dirs, err := ioutil.ReadDir(pastieDir)
+	if err != nil {
+		log.Println("Error reading file directory: " + err.Error())
+		return
+	}
+	expiredFiles := 0
+	expiredDirs := 0
+	for _, d := range dirs {
+		if !d.IsDir() {
+			continue
+		}
+		dirPath := path.Join(pastieDir, d.Name())
+		files, err := ioutil.ReadDir(dirPath)
+		if err != nil {
+			log.Println("Error reading file directory: " + err.Error())
+			continue
+		}
+		unexpired := false
+		for _, f := range files {
+			if time.Now().Sub(f.ModTime()).Hours() <= expirationTimeHours {
+				unexpired = true
+				continue
+			}
+			filepath := path.Join(dirPath, f.Name())
+			if err := os.Remove(filepath); err != nil {
+				log.Println("Error deleting file: " + err.Error())
+				continue
+			}
+			expiredFiles++
+		}
+		if !unexpired {
+			if err := os.Remove(dirPath); err != nil {
+				log.Println("Error deleting empty directory: " + err.Error())
+				continue
+			}
+			expiredDirs++
+		}
+	}
+	log.Printf("Removed %d expired files and %d empty directories.\n", expiredFiles, expiredDirs)
+}
+
 func main() {
+	// Start the background file deleter going
+	go func() {
+		ticker := time.NewTicker(expirationCheckPeriodHours * time.Hour)
+		for _ = range ticker.C {
+			expire()
+		}
+	}()
+
+	// Set up the server
 	mux := pat.New()
 
 	mux.Add("GET", "/favicon.ico", http.FileServer(http.Dir(staticDir)))
