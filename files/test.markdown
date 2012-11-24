@@ -49,10 +49,10 @@ Sample code snippet:
 
 ``` ruby
 def fib(n)
-	case n
-	when 0 then 1
-	when 1 then 1
-	else fib(n - 1) + fib(n - 2)
+  case n
+  when 0 then 1
+  when 1 then 1
+  else fib(n - 1) + fib(n - 2)
 end
 ```
 

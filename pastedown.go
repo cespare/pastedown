@@ -1,11 +1,9 @@
 package main
 
 import (
-	"github.com/cespare/blackfriday"
-	"github.com/cespare/go-apachelog"
-	"github.com/gorilla/pat"
-
 	"bytes"
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"html/template"
 	"io"
@@ -15,7 +13,12 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"time"
+
+	"github.com/cespare/blackfriday"
+	"github.com/cespare/go-apachelog"
+	"github.com/gorilla/pat"
 )
 
 const (
@@ -32,6 +35,7 @@ var (
 	markdownRenderer   *blackfriday.Html
 	markdownExtensions int
 	viewHtml           []byte
+	filenameRegex      = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
 )
 
 func init() {
@@ -124,7 +128,15 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No such file.", http.StatusInternalServerError)
 		return
 	}
-	contents, err := ioutil.ReadFile(pastieDir + "/" + id)
+	var filename string
+	// If the filename is one made by Pastedown, then look in the directory structure we expect; otherwise, just
+	// try to find such a file directly.
+	if filenameRegex.MatchString(id) {
+		filename = path.Join(pastieDir, id[:2], id[2:])
+	} else {
+		filename = path.Join(pastieDir, id)
+	}
+	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		http.Error(w, "No such file.", http.StatusNotFound)
 		return
@@ -171,12 +183,46 @@ func previewHandler(w http.ResponseWriter, r *http.Request) {
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
 	preview, err := decodePastie(r)
+	bytes := []byte(preview.Text)
 	if err != nil {
+		log.Println("Error decoding pastie for saving: " + err.Error())
 		http.Error(w, "Could not save text.", http.StatusInternalServerError)
 		return
 	}
-	_ = preview
-	w.Write([]byte("test.ruby"))
+	sha := sha1.New()
+	sha.Write(bytes)
+	hash := base64.URLEncoding.EncodeToString(sha.Sum(nil))
+
+	// The filename is constructed in the following manner:
+	//
+	// - Chop off the last '=' (padding character) of the hash -- all the shas are the same length anyway so
+	//   we might as well get rid of the character that they all have in common.
+	// - Chop the first two characters off the front of the hash and use this as the directory to limit the
+	//	 number files in a single directory (git uses this trick for its object store).
+	// - The full file format name is used as the extension.
+	//
+	// So for example:
+	// { sha: jBEtyBOnX_M2rp7DNp3mQskWqwg=, filetype: markdown } => jB/EtyBOnX_M2rp7DNp3mQskWqwg.markdown
+	directory := path.Join(pastieDir, hash[0:2])
+	logicalName := hash[:len(hash)-1] + "." + preview.Format
+	filename := path.Join(directory, hash[2:len(hash)-1]+"."+preview.Format)
+	err = os.MkdirAll(directory, 0771)
+	if err != nil {
+		log.Println("Error creating new directory: " + err.Error())
+		http.Error(w, "Could not save text.", http.StatusInternalServerError)
+		return
+	}
+	_, err = os.Stat(filename)
+	if err != nil {
+		err = ioutil.WriteFile(filename, bytes, 0666)
+		if err != nil {
+			log.Println("Error writing pastie file: " + err.Error())
+			http.Error(w, "Could not save text.", http.StatusInternalServerError)
+			return
+		}
+	}
+	// Otherwise file already exists
+	w.Write([]byte(logicalName))
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +240,7 @@ func main() {
 	staticPath := "/" + staticDir + "/"
 	mux.Add("GET", staticPath, http.StripPrefix(staticPath, http.FileServer(http.Dir("./"+staticDir))))
 
-	mux.Get("/files/{id:[\\w\\.]+}", pastieHandler)
+	mux.Get(`/files/{id:[\w\.\-]+}`, pastieHandler)
 	mux.Post("/preview", previewHandler)
 	mux.Put("/file", saveHandler)
 	mux.Get("/", viewHandler)
