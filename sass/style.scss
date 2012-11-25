@@ -207,7 +207,7 @@ body {
     pre, code, {
       font-family: "Inconsolata", monospace;
     }
-    h1, h2, h3, h4, h5 {
+    h1, h2, h3, h4, h5, h6 {
       font-weight: normal;
     }
     h1 {
@@ -230,6 +230,11 @@ body {
     }
     h5 {
       font-size: 18px;
+      padding-bottom: $baseline;
+    }
+    h6 {
+      font-size: 15px;
+      font-weight: bold;
       padding-bottom: $baseline;
     }
     p {
@@ -260,8 +265,32 @@ body {
       padding-bottom: $baseline;
     }
     ul, ol {
-      padding-bottom: $baseline;
-      padding-left: 18px;
+      margin-bottom: $baseline;
+      padding-left: 20px;
+    }
+    hr {
+      height: 0;
+      border-top: none;
+      border-bottom: 1px solid $coreGreen;
+      margin-bottom: $baseline;
+    }
+    table {
+      border-collapse: collapse;
+      margin: $baseline 0 (2 * $baseline) 0;
+      thead { font-weight: bold; }
+      tbody {
+        tr:nth-child(odd) {
+          background-color: #ddd;
+        }
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 6px $baseline;
+      }
+    }
+    img {
+      max-width: 600px;
+      max-height: 600px;
     }
   }
 }

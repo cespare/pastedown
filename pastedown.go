@@ -71,6 +71,7 @@ func init() {
 	markdownExtensions |= blackfriday.EXTENSION_TABLES
 	markdownExtensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
 	markdownExtensions |= blackfriday.EXTENSION_SPACE_HEADERS
+	markdownExtensions |= blackfriday.EXTENSION_AUTOLINK
 
 	// Check that the main info file exists.
 	_, err = os.Stat(pastieDir + "/" + mainPastie)
