@@ -43,11 +43,16 @@ $coreGreen: #15a226;
 #footer {
   height: 8 * $baseline;
   width: $pageWidth;
-  text-align: right;
+  text-align: center;
   margin: 0 auto;
   font-size: 30px;
   padding-top: 5px;
-  a { color: $coreGreen; }
+  color: $coreGreen;
+  a {
+    color: $coreGreen;
+    text-decoration: underline;
+    &:hover { text-decoration: underline; }
+  }
 }
 
 #controls {

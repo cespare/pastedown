@@ -26,6 +26,7 @@ const (
 	staticDir                  = "public"
 	pastieDir                  = "files"
 	mainPastie                 = "about.markdown"
+	markdownReferencePastie    = "reference.markdown"
 	pygmentize                 = "./vendor/pygments/pygmentize"
 	viewFile                   = "view.html"
 	expirationTimeHours        = 7 * 24
@@ -85,7 +86,8 @@ func init() {
 		log.Fatalln(err)
 	}
 	b := new(bytes.Buffer)
-	err = viewTemplate.Execute(b, struct{ MainId string }{mainPastie})
+	templateData := struct{ MainId, MarkdownReferenceId string }{mainPastie, markdownReferencePastie}
+	err = viewTemplate.Execute(b, templateData)
 	if err != nil {
 		log.Fatalln(err)
 	}
