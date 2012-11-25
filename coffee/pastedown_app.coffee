@@ -1,4 +1,4 @@
-window.Pastedown =
+Pastedown =
   editBoxContents: ""
   editBoxDirty: false
 
@@ -237,7 +237,6 @@ window.Pastedown =
     @stopSpinner()
     $(".disabled").removeClass("disabled")
     alert "There was a server error and this paste could not be saved."
-
 
 $ ->
   Pastedown.init()
