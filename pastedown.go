@@ -40,6 +40,9 @@ var (
 	mainPastie          string
 	markdownRefPastie   string
 	expirationTimeHours int
+	useTls bool
+	tlsCertFile string
+	tlsKeyFile string
 )
 
 var (
@@ -63,6 +66,9 @@ func init() {
 		"The document to display at the 'markdown reference' link")
 	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
 		"How long to keep documents before deleting them")
+	flag.BoolVar(&useTls, "tls", false, "Whether to serve over HTTPS.")
+	flag.StringVar(&tlsCertFile, "certfile", "cert.pem", "TLS certificate file to use")
+	flag.StringVar(&tlsKeyFile, "keyfile", "key.pem", "TLS private key file to use")
 
 	// Get the list of valid lexers from pygments.
 	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
@@ -360,6 +366,11 @@ func main() {
 		Addr:    listenAddr,
 		Handler: handler,
 	}
-	log.Println("Now listening on", listenAddr)
-	log.Fatalf(server.ListenAndServe().Error())
+	log.Println("Now listening on", listenAddr, " TLS =", useTls)
+	if useTls {
+		err = server.ListenAndServeTLS(tlsCertFile, tlsKeyFile)
+	} else {
+		err = server.ListenAndServe()
+	}
+	log.Fatalf(err.Error())
 }
