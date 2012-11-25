@@ -40,9 +40,9 @@ var (
 	mainPastie          string
 	markdownRefPastie   string
 	expirationTimeHours int
-	useTls bool
-	tlsCertFile string
-	tlsKeyFile string
+	useTls              bool
+	tlsCertFile         string
+	tlsKeyFile          string
 )
 
 var (

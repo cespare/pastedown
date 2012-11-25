@@ -9,7 +9,7 @@ import (
 )
 
 type cacheValue struct {
-	key string
+	key   string
 	bytes []byte
 }
 
