@@ -21,6 +21,8 @@ import (
 	"github.com/cespare/blackfriday"
 	"github.com/cespare/go-apachelog"
 	"github.com/gorilla/pat"
+
+	"./cache"
 )
 
 const (
@@ -28,6 +30,7 @@ const (
 	pygmentize                 = "./vendor/pygments/pygmentize"
 	viewFile                   = "view.html"
 	expirationCheckPeriodHours = 1
+	renderCacheSizeBytes       = 5 << 20 // 5 MB
 )
 
 // User-configurable values
@@ -46,6 +49,7 @@ var (
 	viewHtml           []byte
 	filenameRegex      = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
 	expiryMsg          string
+	renderCache        = cache.New(renderCacheSizeBytes)
 )
 
 func init() {
@@ -133,7 +137,6 @@ func render(text []byte, format string) []byte {
 func touch(path string) { os.Chtimes(path, time.Now(), time.Now()) }
 
 func pastieHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(0 * time.Second)
 	id := r.URL.Query().Get(":id")
 	if len(id) == 0 {
 		http.Error(w, "No such file.", http.StatusInternalServerError)
@@ -148,27 +151,43 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		filename = path.Join(pastieDir, id)
 	}
 	touch(filename)
+
+	// Render the proper format according to the extension if ?rendered=true.
+	if r.URL.Query().Get("rendered") == "true" {
+		// First try to find the rendered document in cache
+		rendered, ok := renderCache.Get(filename)
+		if ok {
+			w.Write(rendered)
+			return
+		}
+
+		// Wasn't in cache; render it from disk.
+		contents, err := ioutil.ReadFile(filename)
+		if err != nil {
+			http.Error(w, "No such file.", http.StatusNotFound)
+			return
+		}
+		extension := path.Ext(id)
+		if extension == "" {
+			extension = "text"
+		} else {
+			extension = extension[1:]
+		}
+
+		rendered = render(contents, extension)
+		renderCache.Insert(filename, rendered)
+		w.Write(rendered)
+		return
+	}
+
+	// Return the raw contents if ?rendered=true wasn't set.
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		http.Error(w, "No such file.", http.StatusNotFound)
 		return
 	}
-
-	// Just return the raw contents if ?rendered=true wasn't set.
-	if r.URL.Query().Get("rendered") != "true" {
-		w.Write(contents)
-		return
-	}
-
-	// Otherwise, render the proper format according to the extension.
-	extension := path.Ext(id)
-	if extension == "" {
-		extension = "text"
-	} else {
-		extension = extension[1:]
-	}
-
-	w.Write(render(contents, extension))
+	renderCache.Update(filename)
+	w.Write(contents)
 }
 
 func decodePastie(r *http.Request) (*Pastie, error) {
