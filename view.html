@@ -31,6 +31,9 @@
           <label><input type="radio" name="format" value="code">code</label>
           <select id="language">
             <option value=""></option>
+            <!-- TODO: I could generate this list from the `pygmentize -L lexers` output (which I already
+            parse in order to determine what is an acceptable highlighting language), but I don't want the full
+            list to appear in the selection list so for now I'm just use curated list of languages. -->
             <option value="as">ActionScript</option>
             <option value="c">C</option>
             <option value="cl">Common Lisp</option>
