@@ -190,7 +190,6 @@ Pastedown =
     $editBox.text(data)
     $("#contents").html($editBox)
 
-
   # Show an error with the page loading.
   onError: (jqXHR, textStatus, errorThrown) ->
     @stopSpinner()
