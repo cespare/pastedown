@@ -274,6 +274,7 @@ body {
     }
     p {
       padding-bottom: $baseline;
+      text-align: justify;
     }
     code {
       padding: 2px;
@@ -304,9 +305,10 @@ body {
       padding-left: 20px;
     }
     hr {
-      height: 0;
-      border-top: none;
-      border-bottom: 1px solid $coreGreen;
+      height: 4px;
+      border-radius: 2px;
+      background-color: #ddd;
+      border: none;
       margin-bottom: $baseline;
     }
     table {
