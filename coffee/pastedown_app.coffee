@@ -32,6 +32,14 @@ Pastedown =
 
     @loadRendered()
 
+  disableControls: ->
+    $("#left").addClass("disabled")
+    $("#right").addClass("disabled")
+    $("#share").addClass("disabled")
+
+  enableControls: ->
+    $("#controls .disabled").removeClass("disabled")
+
   # spin.js options
   spinnerOptions:
     lines: 9, # The number of lines to draw
@@ -86,14 +94,14 @@ Pastedown =
     window.location.hash = ""
 
   prepareForViewChange: ->
-    $("#controls").addClass("disabled")
+    @disableControls()
     $("#contents").empty()
     @startSpinner()
 
   # mode is either "view" or "edit".
   afterViewChange: (mode) ->
     @stopSpinner()
-    $("#controls").removeClass("disabled")
+    @enableControls()
     if mode == "view"
       $("#edit").removeClass("selected")
       $("#view").addClass("selected")
@@ -227,7 +235,7 @@ Pastedown =
     else
       text = $("#edit-box").val()
 
-    $("#controls").addClass("disabled")
+    @disableControls()
     $("#contents").addClass("disabled")
     @startSpinner()
     $.ajax
