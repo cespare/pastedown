@@ -14,6 +14,7 @@ Pastedown =
     $("#view").on "click", =>
       return if $("#view").hasClass("selected")
       @loadRendered()
+    $("#new").on "click", => @onNew()
     $("#share").on "click", => @onShare()
     $("#contents").on "input", (e) => @onFileChange(e)
     $("#controls").on "change", "input, select", (e) => @onFileChange(e)
@@ -198,6 +199,15 @@ Pastedown =
     else
       message = "Error loading paste."
     $("#contents").html("<div class='error'>#{message}</div>")
+
+  onNew: ->
+    @editBoxContents = ""
+    @editBoxDirty = true
+    window.location.hash = ""
+    $("#formatChoice input[value=text]").attr("checked", "checked")
+    $("#formatChoice input[value!=text]").removeAttr("checked")
+    $("#language").val("")
+    @loadEdit()
 
   showShareMessage: ->
     message = """
