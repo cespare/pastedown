@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -22,15 +23,19 @@ import (
 )
 
 const (
-	listenAddr                 = "localhost:8389"
 	staticDir                  = "public"
-	pastieDir                  = "files"
-	mainPastie                 = "about.markdown"
-	markdownReferencePastie    = "reference.markdown"
 	pygmentize                 = "./vendor/pygments/pygmentize"
 	viewFile                   = "view.html"
-	expirationTimeHours        = 7 * 24
 	expirationCheckPeriodHours = 1
+)
+
+// User-configurable values
+var (
+	listenAddr              string
+	pastieDir               string
+	mainPastie              string
+	markdownReferencePastie string
+	expirationTimeHours     int
 )
 
 var (
@@ -43,6 +48,15 @@ var (
 
 func init() {
 	var err error
+
+	// Set up flags
+	flag.StringVar(&listenAddr, "listenaddr", "localhost:8389", "The server address on which to listen")
+	flag.StringVar(&pastieDir, "storagedir", "files", "The directory in which to store documents")
+	flag.StringVar(&mainPastie, "mainpage", "about.markdown", "The document to display on the front page")
+	flag.StringVar(&markdownReferencePastie, "referencepage", "reference.markdown",
+		"The document to display at the 'markdown reference' link")
+	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
+		"How long to keep documents before deleting them")
 
 	// Get the list of valid lexers from pygments.
 	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
@@ -267,7 +281,7 @@ func expire() {
 		}
 		unexpired := false
 		for _, f := range files {
-			if time.Now().Sub(f.ModTime()).Hours() <= expirationTimeHours {
+			if time.Now().Sub(f.ModTime()).Hours() <= float64(expirationTimeHours) {
 				unexpired = true
 				continue
 			}
@@ -290,6 +304,8 @@ func expire() {
 }
 
 func main() {
+	flag.Parse()
+
 	// Start the background file deleter going
 	go func() {
 		ticker := time.NewTicker(expirationCheckPeriodHours * time.Hour)
