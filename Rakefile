@@ -34,8 +34,12 @@ namespace :build do
   end
 
   desc "Build Pastedown server into a tarball ready for copying to a server."
-  task :all => [:server, :styles, :javascript] do
+  task :all => [:server, :styles, :javascript] {}
+
+  desc "Build a tarball ready to be copied to your server."
+  task :tarball => :all do
     exec_with_message("Tarring up files...", "tar czf #{OUTPUT} #{FILES.join(" ")}")
     puts "Done. Output is #{OUTPUT}"
   end
+
 end
