@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -31,11 +32,11 @@ const (
 
 // User-configurable values
 var (
-	listenAddr              string
-	pastieDir               string
-	mainPastie              string
-	markdownReferencePastie string
-	expirationTimeHours     int
+	listenAddr          string
+	pastieDir           string
+	mainPastie          string
+	markdownRefPastie   string
+	expirationTimeHours int
 )
 
 var (
@@ -44,6 +45,7 @@ var (
 	markdownExtensions int
 	viewHtml           []byte
 	filenameRegex      = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
+	expiryMsg          string
 )
 
 func init() {
@@ -53,7 +55,7 @@ func init() {
 	flag.StringVar(&listenAddr, "listenaddr", "localhost:8389", "The server address on which to listen")
 	flag.StringVar(&pastieDir, "storagedir", "files", "The directory in which to store documents")
 	flag.StringVar(&mainPastie, "mainpage", "about.markdown", "The document to display on the front page")
-	flag.StringVar(&markdownReferencePastie, "referencepage", "reference.markdown",
+	flag.StringVar(&markdownRefPastie, "referencepage", "reference.markdown",
 		"The document to display at the 'markdown reference' link")
 	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
 		"How long to keep documents before deleting them")
@@ -93,19 +95,6 @@ func init() {
 	if err != nil {
 		log.Fatalln("Error with main info file: " + err.Error())
 	}
-
-	// Load in the main view template
-	viewTemplate, err := template.ParseFiles(viewFile)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	b := new(bytes.Buffer)
-	templateData := struct{ MainId, MarkdownReferenceId string }{mainPastie, markdownReferencePastie}
-	err = viewTemplate.Execute(b, templateData)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	viewHtml = b.Bytes()
 }
 
 func syntaxHighlight(out io.Writer, in io.Reader, language string) {
@@ -303,6 +292,14 @@ func expire() {
 	log.Printf("Removed %d expired files and %d empty directories.\n", expiredFiles, expiredDirs)
 }
 
+// Creates a string describing the expiry time; e.g., '24 hours' or '14 days'
+func createExpiryMsg() string {
+	if expirationTimeHours > 48 {
+		return fmt.Sprintf("%d days", expirationTimeHours/24)
+	}
+	return fmt.Sprintf("%d hours", expirationTimeHours)
+}
+
 func main() {
 	flag.Parse()
 
@@ -313,6 +310,21 @@ func main() {
 			expire()
 		}
 	}()
+
+	// Load in the main view template
+	viewTemplate, err := template.ParseFiles(viewFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	b := new(bytes.Buffer)
+	templateData := struct {
+		ExpiryMsg, MainId, MarkdownRefId string
+	}{createExpiryMsg(), mainPastie, markdownRefPastie}
+	err = viewTemplate.Execute(b, templateData)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	viewHtml = b.Bytes()
 
 	// Set up the server
 	mux := pat.New()
