@@ -2,13 +2,26 @@
 
 An easy-to-use markdown-formatting pastebin.
 
+## Dependencies:
+
+Pastedown is written in [Go](http://golang.org) and uses [Sass](http://sass-lang.com/) and
+[Coffeescript](http://coffeescript.org/) for generating stylesheets and Javascript. It uses
+[Pygments](http://pygments.org/) for syntax highlighting.
+
+To run Pastedown, you will need:
+
+* Python
+
+To build/develop Pastedown you will also require:
+
+* Ruby/bundler and all gems in the Gemfile
+* [Go](http://golang.org)
+
 ## Installation
 
 For now, the process is:
 
 1. Clone this repo.
-1. Install Ruby/Bundler.
-1. Install [Go](http://golang.org)
 1. `$ bundle install`
 1. `$ bundle exec rake`
 
