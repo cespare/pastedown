@@ -133,9 +133,6 @@ func render(text []byte, format string) []byte {
 	return rendered
 }
 
-// Update the mtime
-func touch(path string) { os.Chtimes(path, time.Now(), time.Now()) }
-
 func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get(":id")
 	if len(id) == 0 {
@@ -150,7 +147,6 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		filename = path.Join(pastieDir, id)
 	}
-	touch(filename)
 
 	// Render the proper format according to the extension if ?rendered=true.
 	if r.URL.Query().Get("rendered") == "true" {
@@ -246,7 +242,6 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = os.Stat(filename)
 	if err == nil {
 		log.Println("Request for existing pastie: " + filename)
-		touch(filename)
 	} else {
 		log.Println("Saving new pastie: " + filename)
 		err = ioutil.WriteFile(filename, bytes, 0666)
@@ -294,6 +289,9 @@ func expire() {
 				continue
 			}
 			filepath := path.Join(dirPath, f.Name())
+			// Remove from cache
+			renderCache.Delete(filepath)
+			// Remove from disk
 			if err := os.Remove(filepath); err != nil {
 				log.Println("Error deleting file: " + err.Error())
 				continue
