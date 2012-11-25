@@ -2,3 +2,5 @@
 /.sass-cache
 /public/*
 /files/*
+/pastedown
+/*.tgz

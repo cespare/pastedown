@@ -1,5 +1,6 @@
 source :rubygems
 
+gem "rake"
 gem "guard"
 gem "guard-shell"
 gem "guard-restarter"
