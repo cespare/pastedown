@@ -25,6 +25,19 @@ $coreGreen: #15a226;
   outline: none
 }
 
+pre, textarea {
+  // Display tabs as 4 spaces
+  -moz-tab-size: 4;
+  -webkit-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+}
+
+pre {
+  // Don't allow overflowing horizontally -- scroll instead
+  overflow-x: auto;
+}
+
 #header {
   text-align: center;
   font-size: 60px;
@@ -234,7 +247,6 @@ body {
     line-height: 20px;
     font-family: "Inconsolata", monospace;
     pre {
-      overflow-x: auto;
       font-family: "Inconsolata", monospace;
     }
   }
@@ -293,7 +305,6 @@ body {
     }
     pre {
       line-height: 2 * $baseline;
-      overflow-x: auto;
       background-color: #ddd;
       border-radius: 3px;
       padding: $baseline;
