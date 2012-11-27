@@ -29,8 +29,16 @@ Pastedown =
         if $(document.activeElement).closest("#share-message").length == 0
           $("#share-message").fadeOut("fast")
       ), 0
+    unless @isFirefox()
+      # Unfortunately my current text-editing situation only works on chrome. It relies on being able to
+      # create a TextInput event, and initTextEvent isn't implemented in firefox yet.
+      $("#contents").on "keydown", "#edit-box", (e) => @onEditBoxKeydown(e)
+      $("#contents").on "keyup", "#edit-box", (e) => @onEditBoxKeyup(e)
 
     @loadRendered()
+
+  # Basing our detection on the one feature that we differentiate on
+  isFirefox: -> !document.createEvent("TextEvent").initTextEvent?
 
   disableControls: ->
     $("#left").addClass("disabled")
@@ -179,7 +187,6 @@ Pastedown =
 
   # Show a text edit box with the current contents inside.
   onEditSuccess: (data, textStatus, jqXHR) ->
-    @afterViewChange("edit")
     format = @currentFormat()
     switch(format)
       when "text"
@@ -197,6 +204,7 @@ Pastedown =
     $editBox = $("<textarea id='edit-box'></textarea>")
     $editBox.text(data)
     $("#contents").html($editBox)
+    @afterViewChange("edit")
 
   # Show an error with the page loading.
   onError: (jqXHR, textStatus, errorThrown) ->
@@ -254,6 +262,35 @@ Pastedown =
     @stopSpinner()
     $(".disabled").removeClass("disabled")
     alert "There was a server error and this paste could not be saved."
+
+  # http://stackoverflow.com/questions/7553430/javascript-textarea-undo-redo
+  # This doesn't work in Firefox.
+  insertTextAtCursor: ($element, text) ->
+    event = document.createEvent("TextEvent")
+    event.initTextEvent("textInput", true, true, null, text)
+    $element.dispatchEvent(event)
+
+  # To make the edit box a little more friendly for typing in code, we make a couple of changes to the default
+  # behavior.
+
+  # On 'tab', insert a literal tab rather than the usual browser behavior of going to the next element.
+  onEditBoxKeydown: (e) ->
+    return unless e.which == 9 # tab
+    @onFileChange(e)
+    e.preventDefault()
+    @insertTextAtCursor($("#edit-box")[0], "	")
+
+  # On 'return', copy any leading whitespace to the next line (a poor man's auto-indent)
+  onEditBoxKeyup: (e) ->
+    return unless e.which == 13 # enter
+    $t = $("#edit-box")
+    # Get the current line
+    position = $t[0].selectionStart
+    firstPart = $t.val().substring(0, position - 1)
+    currentLine = firstPart.substring(firstPart.lastIndexOf("\n") + 1)
+    # Figure how much leading whitespace is in the current line
+    leadingWhitespace = currentLine.match(/^\s+/)?[0] or ""
+    @insertTextAtCursor($("#edit-box")[0], leadingWhitespace)
 
 $ ->
   Pastedown.init()
