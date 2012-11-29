@@ -2,6 +2,17 @@
 
 An easy-to-use markdown-formatting pastebin.
 
+## Demo
+
+http://pastedown.ctrl-c.us
+
+## Features
+
+* Markdown rendering and syntax highlighting
+* Doesn't look terrible
+* HTTPS built in
+* Automatic document deletion
+
 ## Dependencies:
 
 Pastedown is written in [Go](http://golang.org) and uses [Sass](http://sass-lang.com/) and
