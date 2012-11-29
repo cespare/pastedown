@@ -65,7 +65,7 @@ func init() {
 	flag.StringVar(&markdownRefPastie, "referencepage", "reference.markdown",
 		"The document to display at the 'markdown reference' link")
 	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
-		"How long to keep documents before deleting them")
+		"How long to keep documents before deleting them (0 for 'never delete')")
 	flag.BoolVar(&useTls, "tls", false, "Whether to serve over HTTPS.")
 	flag.StringVar(&tlsCertFile, "certfile", "cert.pem", "TLS certificate file to use")
 	flag.StringVar(&tlsKeyFile, "keyfile", "key.pem", "TLS private key file to use")
@@ -315,24 +315,29 @@ func expire() {
 	log.Printf("Removed %d expired files and %d empty directories.\n", expiredFiles, expiredDirs)
 }
 
-// Creates a string describing the expiry time; e.g., '24 hours' or '14 days'
+// Creates a string describing the expiry time.
 func createExpiryMsg() string {
-	if expirationTimeHours > 48 {
-		return fmt.Sprintf("%d days", expirationTimeHours/24)
+	switch {
+	case expirationTimeHours == 0:
+		return "documents are not deleted"
+	case expirationTimeHours > 48:
+		return fmt.Sprintf("documents are deleted after %d days", expirationTimeHours/24)
 	}
-	return fmt.Sprintf("%d hours", expirationTimeHours)
+	return fmt.Sprintf("documents are deleted after %d hours", expirationTimeHours)
 }
 
 func main() {
 	flag.Parse()
 
 	// Start the background file deleter going
-	go func() {
-		ticker := time.NewTicker(expirationCheckPeriodHours * time.Hour)
-		for _ = range ticker.C {
-			expire()
-		}
-	}()
+	if expirationTimeHours > 0 {
+		go func() {
+			ticker := time.NewTicker(expirationCheckPeriodHours * time.Hour)
+			for _ = range ticker.C {
+				expire()
+			}
+		}()
+	}
 
 	// Load in the main view template
 	viewTemplate, err := template.ParseFiles(viewFile)
