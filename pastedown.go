@@ -112,10 +112,15 @@ func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 	if !ok || language == "" {
 		language = "text"
 	}
-	pygmentsCommand := exec.Command(pygmentize, "-l", language, "-f", "html")
+	pygmentsCommand := exec.Command(pygmentize, "-l", language, "-f", "html", "-P", "encoding=utf-8")
 	pygmentsCommand.Stdin = in
 	pygmentsCommand.Stdout = out
-	pygmentsCommand.Run()
+	var stderr bytes.Buffer
+	pygmentsCommand.Stderr = &stderr
+	if err := pygmentsCommand.Run(); err != nil {
+		log.Println("Error with syntax highlighting:", err)
+		log.Println("Stderr:\n", stderr.String())
+	}
 }
 
 type Pastie struct {
