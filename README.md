@@ -25,16 +25,17 @@ To run Pastedown, you will need:
 
 To build/develop Pastedown you will also require:
 
-* Ruby/bundler and all gems in the Gemfile
+* Ruby and [SASS](http://sass-lang.com/)
+* [Coffeescript](http://coffeescript.org/)
 * [Go](http://golang.org)
+* [Reflex](https://github.com/cespare/reflex)
 
 ## Installation
 
 For now, the process is:
 
 1. Clone this repo.
-1. `$ bundle install`
-1. `$ bundle exec rake`
+1. Run `make`.
 
 This builds the server executable (`pastedown`) and the associated static files. Run it with:
 
@@ -44,16 +45,20 @@ Use `./pastedown -h` to see all the available options.
 
 ## Development
 
-You'll need Ruby/Bundler and Go as in the installation instructions. Use the following command to run the
-server and rebuild/rerun it when files change:
+You'll need Reflex and Go as in the installation instructions. Use the following command to run the server and
+rebuild/rerun it when files change:
 
-    $ bundle exec guard
+    $ reflex -d fancy -c Reflexfile
+
+This is also available as
+
+    $ make watch
 
 ## Deployment
 
 Follow the installation instructions, then run this command:
 
-    $ bundle exec rake build:tarball
+    $ make tarball
 
 to build a tarball of all the files you'll need. Copy this to your server and run pastedown with the options
 you want as before. You may wish to make an init script or more fleshed-out deployment scripts.

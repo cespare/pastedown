@@ -1,0 +1,6 @@
+# Server
+-sr '\.(go|html)$' -- make run
+# Coffee -> JS
+-r '\.coffee$' -- make javascript
+# SCSS -> CSS
+-r '\.scss' -- make styles
