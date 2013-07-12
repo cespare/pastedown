@@ -9,6 +9,7 @@
 $pageWidth: 900px;
 $baseline: 13px;
 $coreGreen: #15a226;
+$coreRed: #c92930;
 
 .disabled {
   pointer-events: none;
@@ -68,6 +69,50 @@ pre {
   }
 }
 
+@mixin base-button {
+  border-radius: 3px;
+  margin: 0;
+  display: inline-block;
+  font-size: 20px;
+  font-family: "Open Sans", sans-serif;
+  cursor: pointer;
+}
+
+@mixin gray-button {
+  @include base-button;
+  $baseGray: #ccc;
+  color: #222;
+  text-shadow: 1px 1px 0px #ddd;
+  border: 1px solid darken($baseGray, 30%);
+  @include background-image(linear-gradient($baseGray 0%, darken($baseGray, 20%) 100%));
+  @include box-shadow(inset 0 1px 0 0 lighten($baseGray, 10%));
+  &:hover {
+    @include background-image(linear-gradient(lighten($baseGray, 2%) 0%, darken($baseGray, 15%) 100%));
+    @include box-shadow(inset 0 1px 0 0 lighten($baseGray, 15%));
+  }
+  &:active, &.selected {
+    @include background-image(linear-gradient(darken($baseGray, 5%) 0%, darken($baseGray, 25%) 100%));
+    @include box-shadow(inset 0 0 8px 4px darken($baseGray, 30%));
+  }
+}
+
+@mixin bright-button($color) {
+  @include base-button;
+  color: #efefef;
+  text-shadow: -1px -1px 0px #222;
+  border: 1px solid darken($color, 10%);
+  @include background-image(linear-gradient(darken($color, 1%) 0%, darken($color, 6%) 100%));
+  @include box-shadow(inset 0 1px 0 0 lighten($color, 5%));
+  &:hover {
+    @include background-image(linear-gradient(darken($color, 5%) 0%, darken($color, 10%) 100%));
+    @include box-shadow(inset 0 1px 0 0 $color);
+  }
+  &:active, &.selected {
+    @include background-image(linear-gradient(darken($color, 5%) 0%, darken($color, 10%) 100%));
+    @include box-shadow(inset 0 0 8px 4px darken($color, 15%));
+  }
+}
+
 #controls {
   $contentHeight: 35px;
   $height: 80px;
@@ -96,31 +141,13 @@ pre {
   #left {
     padding-left: $controlSpacing;
     button {
+      @include gray-button;
+      height: $contentHeight;
+      width: $buttonWidth - 20px;
       border-radius: 0 3px 3px 0;
       &:first-child {
         border-right: none;
         border-radius: 3px 0 0 3px;
-      }
-      $baseGray: #ccc;
-      margin: 0;
-      display: inline-block;
-      font-size: 20px;
-      font-family: "Open Sans", sans-serif;
-      color: #222;
-      text-shadow: 1px 1px 0px #ddd;
-      height: $contentHeight;
-      width: $buttonWidth - 20px;
-      border: 1px solid darken($baseGray, 30%);
-      @include background-image(linear-gradient($baseGray 0%, darken($baseGray, 20%) 100%));
-      @include box-shadow(inset 0 1px 0 0 lighten($baseGray, 10%));
-      cursor: pointer;
-      &:hover {
-        @include background-image(linear-gradient(lighten($baseGray, 2%) 0%, darken($baseGray, 15%) 100%));
-        @include box-shadow(inset 0 1px 0 0 lighten($baseGray, 15%));
-      }
-      &:active, &.selected {
-        @include background-image(linear-gradient(darken($baseGray, 5%) 0%, darken($baseGray, 25%) 100%));
-        @include box-shadow(inset 0 0 8px 4px darken($baseGray, 30%));
       }
     }
   }
@@ -129,29 +156,18 @@ pre {
     position: relative;
     padding-left: $controlSpacing;
     @include box-flex(1);
-    button {
-      &:not(:last-child) { margin-right: $buttonSpacing; }
-      margin: 0;
-      display: inline-block;
-      font-size: 20px;
-      font-family: "Open Sans", sans-serif;
-      color: #efefef;
-      text-shadow: -1px -1px 0px #222;
+    button:not(#delete) {
+      @include bright-button($coreGreen);
       height: $contentHeight;
       width: $buttonWidth;
-      border-radius: 3px;
-      border: 1px solid darken($coreGreen, 10%);
-      @include background-image(linear-gradient(darken($coreGreen, 1%) 0%, darken($coreGreen, 6%) 100%));
-      @include box-shadow(inset 0 1px 0 0 lighten($coreGreen, 5%));
-      cursor: pointer;
-      &:hover {
-        @include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
-        @include box-shadow(inset 0 1px 0 0 $coreGreen);
-      }
-      &:active, &.selected {
-        @include background-image(linear-gradient(darken($coreGreen, 5%) 0%, darken($coreGreen, 10%) 100%));
-        @include box-shadow(inset 0 0 8px 4px darken($coreGreen, 15%));
-      }
+      &:not(:last-child) { margin-right: $buttonSpacing; }
+    }
+    #delete {
+      @include bright-button($coreRed);
+      display: none;
+      width: 80px;
+      height: $contentHeight;
+      width: $buttonWidth;
     }
   }
 
@@ -220,7 +236,10 @@ body {
   background-color: #efefef;
 }
 
-#spacer { padding: $baseline; }
+#spacer {
+  padding: $baseline;
+  position: relative;
+}
 
 #edit-box {
   font: 16px / 18px "Inconsolata", monospace;

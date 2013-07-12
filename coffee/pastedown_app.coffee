@@ -69,11 +69,7 @@ Pastedown =
   currentFormat: ->
     if @editBoxDirty
       format = $("#formatChoice input:checked").val()
-      switch(format)
-        when "markdown", "text"
-          format
-        else
-          $("#formatChoice option:selected").val()
+      if format == "markdown" then format else $("#formatChoice option:selected").val()
     else
       id = window.location.hash[1..]
       dotIndex = id.lastIndexOf(".")
@@ -169,38 +165,27 @@ Pastedown =
   onRenderedSuccess: (data, textStatus, jqXHR) ->
     @afterViewChange("view")
     format = @currentFormat()
-    switch(format)
-      when "text"
-        $text = $("<pre></pre>")
-        $text.html(data)
-        $("#contents").html($text)
-        $("#contents").attr("data-format", "plain-text")
-        $("#format").html("plain text")
-      when "markdown"
-        $("#contents").html(data)
-        $("#contents").attr("data-format", "markdown")
-        $("#format").html(format)
-      else
-        $("#contents").html(data)
-        $("#contents").attr("data-format", "code")
-        $("#format").html("code (#{@currentLanguage()})")
+    if format == "markdown"
+      $("#contents").html(data)
+      $("#contents").attr("data-format", "markdown")
+      $("#format").html(format)
+    else
+      $("#contents").html(data)
+      $("#contents").attr("data-format", "code")
+      $("#format").html("code (#{@currentLanguage()})")
+    $("#delete").show()
 
   # Show a text edit box with the current contents inside.
   onEditSuccess: (data, textStatus, jqXHR) ->
     format = @currentFormat()
-    switch(format)
-      when "text"
-        $("#formatChoice input[value=text]").attr("checked", "checked")
-        $("#formatChoice input[value!=text]").removeAttr("checked")
-        $("#language").val("")
-      when "markdown"
-        $("#formatChoice input[value=markdown]").attr("checked", "checked")
-        $("#formatChoice input[value!=markdown]").removeAttr("checked")
-        $("#language").val("")
-      else
-        $("#formatChoice input[value=code]").attr("checked", "checked")
-        $("#formatChoice input[value!=code]").removeAttr("checked")
-        $("#language").val(format)
+    if format == "markdown"
+      $("#formatChoice input[value=markdown]").attr("checked", "checked")
+      $("#formatChoice input[value!=markdown]").removeAttr("checked")
+      $("#language").val("")
+    else
+      $("#formatChoice input[value=code]").attr("checked", "checked")
+      $("#formatChoice input[value!=code]").removeAttr("checked")
+      $("#language").val(format)
     $editBox = $("<textarea id='edit-box'></textarea>")
     $editBox.text(data)
     $("#contents").html($editBox)
@@ -219,9 +204,9 @@ Pastedown =
     @editBoxContents = ""
     @editBoxDirty = true
     window.location.hash = ""
-    $("#formatChoice input[value=text]").attr("checked", "checked")
-    $("#formatChoice input[value!=text]").removeAttr("checked")
-    $("#language").val("")
+    $("#formatChoice input[value=code]").attr("checked", "checked")
+    $("#formatChoice input[value!=code]").removeAttr("checked")
+    $("#language").val("text")
     @loadEdit()
 
   showShareMessage: ->

@@ -22,7 +22,8 @@
       <div id="middle">
         <button id="new">new
         </button><button id="share">share
-        </button><div id="share-message"></div>
+        </button><div id="share-message">
+        </div><button id="delete">delete</button>
       </div>
       <div id="right">
         <div id="formatText">
@@ -30,10 +31,8 @@
         </div>
         <div id="formatChoice" style="display: none">
           <label><input type="radio" name="format" value="markdown">markdown</label>
-          <label><input type="radio" name="format" value="text">plain text</label>
           <label><input type="radio" name="format" value="code">code</label>
           <select id="language">
-            <option value=""></option>
             <!-- TODO: I could generate this list from the `pygmentize -L lexers` output (which I already
             parse in order to determine what is an acceptable highlighting language), but I don't want the full
             list to appear in the selection list so for now I'm just use curated list of languages. -->
@@ -66,6 +65,7 @@
             <option value="ocaml">OCaml</option>
             <option value="php">PHP</option>
             <option value="pl">Perl</option>
+            <option value="text" selected>Plain Text</option>
             <option value="properties">Properties</option>
             <option value="protobuf">Protocol Buffer</option>
             <option value="python">Python</option>
