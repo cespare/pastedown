@@ -10,7 +10,7 @@ build:
 	go build -o ./pastedown
 
 styles:
-	sass -r ./vendor/bourbon/lib/bourbon.rb sass/style.scss public/style.css
+	sass -I ./vendor/bourbon/lib/ sass/style.scss public/style.css
 
 javascript:
 	coffee -c -o public coffee/*.coffee
