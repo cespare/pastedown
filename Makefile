@@ -6,7 +6,7 @@ clean:
 run: build
 	./pastedown
 
-build:
+build: styles javascript
 	go build -o ./pastedown
 
 styles:
