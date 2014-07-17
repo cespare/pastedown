@@ -1,4 +1,4 @@
-all: build
+all: build styles javascript
 
 clean:
 	@rm -rf pastedown
