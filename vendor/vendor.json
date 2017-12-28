@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "xHdNqzk/61ereOw5IfmkfP30n/w=",
+			"path": "github.com/cespare/blackfriday",
+			"revision": "c069a100b8ea807496fefc0b051ce69877967779",
+			"revisionTime": "2014-01-13T01:29:08Z"
+		},
+		{
+			"checksumSHA1": "ZqBPixzkrnSPBaoaGxcCgTwQOy0=",
+			"path": "github.com/cespare/hutil/apachelog",
+			"revision": "49147b307265d5fe7eab505419768a17e41c1851",
+			"revisionTime": "2015-05-05T01:47:18Z"
+		},
+		{
+			"checksumSHA1": "IdM4PknwJNF8JpWckCWHS2lvchg=",
+			"path": "github.com/gorilla/pat",
+			"revision": "cf955c3d1f2c27ee96f93e9738085c762ff5f49d",
+			"revisionTime": "2016-04-13T04:16:32Z"
+		}
+	],
+	"rootPath": "github.com/cespare/pastedown"
+}
