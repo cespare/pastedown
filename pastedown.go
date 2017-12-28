@@ -30,7 +30,7 @@ const (
 	pygmentize                 = "./vendor/pygments/pygmentize"
 	viewFile                   = "view.html"
 	expirationCheckPeriodHours = 1
-	renderCacheSizeBytes       = 5 << 20 // 5 MB
+	renderCacheSizeBytes       = 20e6 // 20 MB
 )
 
 // User-configurable values
