@@ -1,7 +1,7 @@
 // A simple LRU cache for storing documents ([]byte). When the size maximum is reached, items are evicted
 // starting with the least recently used. This data structure is goroutine-safe (it has a lock around all
 // operations).
-package cache
+package lru
 
 import (
 	"container/list"

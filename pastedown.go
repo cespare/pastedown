@@ -22,7 +22,7 @@ import (
 	"github.com/cespare/go-apachelog"
 	"github.com/gorilla/pat"
 
-	"./cache"
+	"github.com/cespare/pastedown/lru"
 )
 
 const (
@@ -52,7 +52,7 @@ var (
 	viewHtml           []byte
 	filenameRegex      = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
 	expiryMsg          string
-	renderCache        = cache.New(renderCacheSizeBytes)
+	renderCache        = lru.New(renderCacheSizeBytes)
 )
 
 func init() {
