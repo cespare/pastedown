@@ -1,111 +1,140 @@
-// A simple LRU cache for storing documents ([]byte). When the size maximum is reached, items are evicted
-// starting with the least recently used. This data structure is goroutine-safe (it has a lock around all
-// operations).
+// Package lru provides a simple LRU cache that keys []byte values by strings.
 package lru
 
 import (
-	"container/list"
 	"sync"
 )
 
 type cacheValue struct {
-	key   string
-	bytes []byte
+	key        string
+	val        []byte
+	next, prev *cacheValue
 }
 
-// Just an estimate
-func (v *cacheValue) size() uint64 {
-	return uint64(len([]byte(v.key)) + len(v.bytes))
+func (v *cacheValue) size() int64 {
+	return int64(len([]byte(v.key)) + len(v.val))
 }
 
-type Cache struct {
-	sync.Mutex
-
-	// The approximate size of the structure (doesn't include the overhead of the data structures; just the
-	// sum of the size of the stored documents).
-	Size uint64
-
-	capacity uint64
-	list     *list.List
-	table    map[string]*list.Element
+type cacheValueList struct {
+	front *cacheValue
+	back  *cacheValue
 }
 
-// Create a new Cache with a maximum size of capacity bytes.
-func New(capacity uint64) *Cache {
-	return &Cache{
-		capacity: capacity,
-		list:     list.New(),
-		table:    make(map[string]*list.Element),
+func (l *cacheValueList) pushFront(v *cacheValue) {
+	v.next = l.front
+	v.prev = nil
+	if l.front == nil {
+		l.back = v
+	} else {
+		l.front.prev = v
 	}
+	l.front = v
 }
 
-// Insert some {key, document} into the cache. Doesn't do anything if the key is already present.
-func (c *Cache) Insert(key string, document []byte) {
-	c.Lock()
-	defer c.Unlock()
-
-	_, ok := c.table[key]
-	if ok {
+func (l *cacheValueList) moveToFront(v *cacheValue) {
+	if v.prev == nil {
 		return
 	}
-	v := &cacheValue{key, document}
-	elt := c.list.PushFront(v)
-	c.table[key] = elt
-	c.Size += v.size()
-	c.trim()
+	v.prev.next = v.next
+	if v.next == nil {
+		l.back = v.prev
+	} else {
+		v.next.prev = v.prev
+	}
+	v.prev = nil
+	v.next = l.front
+	if l.front != nil {
+		l.front.prev = v
+	}
+	l.front = v
 }
 
-// Get retrieves a value from the cache and returns the value and an indicator boolean to show whether it was
-// present.
-func (c *Cache) Get(key string) (document []byte, ok bool) {
-	c.Lock()
-	defer c.Unlock()
+func (l *cacheValueList) delete(v *cacheValue) {
+	if v.prev == nil {
+		l.front = v.next
+	} else {
+		v.prev.next = v.next
+	}
+	if v.next == nil {
+		l.back = v.prev
+	} else {
+		v.next.prev = v.prev
+	}
+}
 
-	elt, ok := c.table[key]
+// A Cache is a size-bounded LRU cache which associates string keys
+// with []byte values.
+// All methods are safe for concurrent use by multiple goroutines.
+type Cache struct {
+	mu sync.Mutex
+
+	size     int64
+	capacity int64
+	list     cacheValueList
+	table    map[string]*cacheValue
+}
+
+// New creates a new Cache with a maximum size of capacity bytes.
+func New(capacity int64) *Cache {
+	if capacity < 0 {
+		panic("lru: bad capacity")
+	}
+	return &Cache{
+		capacity: capacity,
+		table:    make(map[string]*cacheValue),
+	}
+}
+
+// Insert adds val to the cache indexed by the given key after evicting enough
+// existing items (least recently used first) to keep the total size beneath
+// this cache's capacity.
+// It does not do anything if the key is already present in the cache or if the
+// size of this single item is greater than the cache's capacity.
+func (c *Cache) Insert(key string, val []byte) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if _, ok := c.table[key]; ok {
+		return
+	}
+	v := &cacheValue{key: key, val: val}
+	if v.size() > c.capacity {
+		return
+	}
+	for c.size+v.size() > c.capacity {
+		c.size -= c.list.back.size()
+		delete(c.table, c.list.back.key)
+		c.list.delete(c.list.back)
+	}
+	c.list.pushFront(v)
+	c.table[key] = v
+	c.size += v.size()
+}
+
+// Get retrieves a value from the cache by key and indicates
+// whether an item was found.
+func (c *Cache) Get(key string) (val []byte, ok bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	v, ok := c.table[key]
 	if !ok {
 		return nil, false
 	}
-	c.list.MoveToFront(elt)
-	return elt.Value.(*cacheValue).bytes, true
+	c.list.moveToFront(v)
+	return v.val, true
 }
 
-// If the key is present, move that document to the front of the list to show that it was most recently used.
-func (c *Cache) Update(key string) {
-	c.Lock()
-	defer c.Unlock()
-
-	elt, ok := c.table[key]
-	if !ok {
-		return
-	}
-	c.list.MoveToFront(elt)
-}
-
-// Delete the document indicated by the key, if it is present.
+// Delete removes the item indicated by the key, if it is present.
 func (c *Cache) Delete(key string) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	elt, ok := c.table[key]
+	v, ok := c.table[key]
 	if !ok {
 		return
 	}
 	delete(c.table, key)
-	v := c.list.Remove(elt).(*cacheValue)
-	c.Size -= v.size()
-}
-
-// If the cache is over capacity, clear elements (starting at the end of the list) until it is back under
-// capacity. Note that this method is not threadsafe (it should only be called from other methods which
-// already hold the lock).
-func (c *Cache) trim() {
-	for c.Size > c.capacity {
-		elt := c.list.Back()
-		if elt == nil {
-			return
-		}
-		v := c.list.Remove(elt).(*cacheValue)
-		delete(c.table, v.key)
-		c.Size -= v.size()
-	}
+	c.list.delete(v)
+	c.size -= v.size()
 }

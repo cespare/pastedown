@@ -193,7 +193,8 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No such file.", http.StatusNotFound)
 		return
 	}
-	renderCache.Update(filename)
+	// Fetch the value to mark it as recently used.
+	_, _ = renderCache.Get(filename)
 	w.Write(contents)
 }
 
