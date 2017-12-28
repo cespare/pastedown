@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/cespare/blackfriday"
-	"github.com/cespare/go-apachelog"
+	"github.com/cespare/hutil/apachelog"
 	"github.com/gorilla/pat"
 
 	"github.com/cespare/pastedown/lru"
@@ -371,7 +371,7 @@ func main() {
 	mux.Put("/file", saveHandler)
 	mux.Get("/", viewHandler)
 
-	handler := apachelog.NewHandler(mux, os.Stderr)
+	handler := apachelog.NewDefaultHandler(mux)
 	server := &http.Server{
 		Addr:    listenAddr,
 		Handler: handler,
