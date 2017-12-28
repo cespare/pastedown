@@ -1,4 +1,4 @@
-all: build styles javascript
+all: build styles
 
 clean:
 	@rm -rf pastedown
@@ -10,10 +10,7 @@ build:
 	go build -o ./pastedown
 
 styles:
-	sass sass/style.scss public/style.css
-
-javascript:
-	coffee -c -o public coffee/*.coffee
+	sassc sass/style.scss public/style.css
 
 tarball:
 	tar czf pastedown_built.tgz pastedown view.html vendor public files/about.markdown files/reference.markdown
