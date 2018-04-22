@@ -299,7 +299,7 @@ func main() {
 	// Get the list of valid lexers from pygments.
 	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Failed to execute pygments:", err)
 	}
 	for _, line := range bytes.Split(rawLexerList, []byte("\n")) {
 		if len(line) == 0 || line[0] != '*' {
