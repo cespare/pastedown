@@ -55,45 +55,6 @@ var (
 	renderCache      = lru.New(renderCacheSizeBytes)
 )
 
-func init() {
-	var err error
-
-	// Set up flags
-	flag.StringVar(&listenAddr, "listenaddr", "localhost:8389", "The server address on which to listen")
-	flag.StringVar(&pastieDir, "storagedir", "files", "The directory in which to store documents")
-	flag.StringVar(&mainPastie, "mainpage", "about.markdown", "The document to display on the front page")
-	flag.StringVar(&markdownRefPastie, "referencepage", "reference.markdown",
-		"The document to display at the 'markdown reference' link")
-	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
-		"How long to keep documents before deleting them (0 for 'never delete')")
-	flag.BoolVar(&useTls, "tls", false, "Whether to serve over HTTPS.")
-	flag.StringVar(&tlsCertFile, "certfile", "cert.pem", "TLS certificate file to use")
-	flag.StringVar(&tlsKeyFile, "keyfile", "key.pem", "TLS private key file to use")
-
-	// Get the list of valid lexers from pygments.
-	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	for _, line := range bytes.Split(rawLexerList, []byte("\n")) {
-		if len(line) == 0 || line[0] != '*' {
-			continue
-		}
-		for _, l := range bytes.Split(bytes.Trim(line, "* :"), []byte(",")) {
-			lexer := string(bytes.TrimSpace(l))
-			if len(lexer) != 0 {
-				validLanguages[lexer] = struct{}{}
-			}
-		}
-	}
-
-	// Check that the main info file exists.
-	_, err = os.Stat(pastieDir + "/" + mainPastie)
-	if err != nil {
-		log.Fatalln("Error with main info file: " + err.Error())
-	}
-}
-
 func syntaxHighlight(out io.Writer, in io.Reader, language string) {
 	_, ok := validLanguages[language]
 	if !ok || language == "" {
@@ -139,8 +100,8 @@ func pastieHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var filename string
-	// If the filename is one made by Pastedown, then look in the directory structure we expect; otherwise, just
-	// try to find such a file directly.
+	// If the filename is one made by Pastedown, then look in the directory
+	// structure we expect; otherwise, just try to find such a file directly.
 	if filenameRegex.MatchString(id) {
 		filename = path.Join(pastieDir, id[:2], id[2:])
 	} else {
@@ -323,7 +284,40 @@ func createExpiryMsg() string {
 }
 
 func main() {
+	flag.StringVar(&listenAddr, "listenaddr", "localhost:8389", "The server address on which to listen")
+	flag.StringVar(&pastieDir, "storagedir", "files", "The directory in which to store documents")
+	flag.StringVar(&mainPastie, "mainpage", "about.markdown", "The document to display on the front page")
+	flag.StringVar(&markdownRefPastie, "referencepage", "reference.markdown",
+		"The document to display at the 'markdown reference' link")
+	flag.IntVar(&expirationTimeHours, "expirationhours", 7*24,
+		"How long to keep documents before deleting them (0 for 'never delete')")
+	flag.BoolVar(&useTls, "tls", false, "Whether to serve over HTTPS.")
+	flag.StringVar(&tlsCertFile, "certfile", "cert.pem", "TLS certificate file to use")
+	flag.StringVar(&tlsKeyFile, "keyfile", "key.pem", "TLS private key file to use")
 	flag.Parse()
+
+	// Get the list of valid lexers from pygments.
+	rawLexerList, err := exec.Command(pygmentize, "-L", "lexers").Output()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for _, line := range bytes.Split(rawLexerList, []byte("\n")) {
+		if len(line) == 0 || line[0] != '*' {
+			continue
+		}
+		for _, l := range bytes.Split(bytes.Trim(line, "* :"), []byte(",")) {
+			lexer := string(bytes.TrimSpace(l))
+			if len(lexer) != 0 {
+				validLanguages[lexer] = struct{}{}
+			}
+		}
+	}
+
+	// Check that the main info file exists.
+	_, err = os.Stat(pastieDir + "/" + mainPastie)
+	if err != nil {
+		log.Fatalln("Error with main info file: " + err.Error())
+	}
 
 	// Start the background file deleter going
 	if expirationTimeHours > 0 {
