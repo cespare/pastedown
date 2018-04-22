@@ -18,9 +18,9 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/cespare/blackfriday"
 	"github.com/cespare/hutil/apachelog"
 	"github.com/gorilla/pat"
+	blackfriday "gopkg.in/russross/blackfriday.v2"
 
 	"github.com/cespare/pastedown/lru"
 )
@@ -46,13 +46,11 @@ var (
 )
 
 var (
-	validLanguages     = make(map[string]struct{})
-	markdownRenderer   *blackfriday.Html
-	markdownExtensions int
-	viewHtml           []byte
-	filenameRegex      = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
-	expiryMsg          string
-	renderCache        = lru.New(renderCacheSizeBytes)
+	validLanguages = make(map[string]struct{})
+	viewHTML       []byte
+	filenameRegex  = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
+	expiryMsg      string
+	renderCache    = lru.New(renderCacheSizeBytes)
 )
 
 func init() {
@@ -86,19 +84,6 @@ func init() {
 			}
 		}
 	}
-
-	// Set up the renderer.
-	flags := 0
-	flags |= blackfriday.HTML_GITHUB_BLOCKCODE
-	markdownRenderer = blackfriday.HtmlRenderer(flags, "", "")
-	markdownRenderer.SetBlockCodeProcessor(syntaxHighlight)
-
-	markdownExtensions = 0
-	markdownExtensions |= blackfriday.EXTENSION_FENCED_CODE
-	markdownExtensions |= blackfriday.EXTENSION_TABLES
-	markdownExtensions |= blackfriday.EXTENSION_NO_INTRA_EMPHASIS
-	markdownExtensions |= blackfriday.EXTENSION_SPACE_HEADERS
-	markdownExtensions |= blackfriday.EXTENSION_AUTOLINK
 
 	// Check that the main info file exists.
 	_, err = os.Stat(pastieDir + "/" + mainPastie)
@@ -134,7 +119,8 @@ func render(text []byte, format string) []byte {
 	case "text":
 		rendered = text
 	case "markdown":
-		rendered = blackfriday.Markdown(text, markdownRenderer, markdownExtensions)
+		html := blackfriday.Run(text)
+		rendered = html
 	default:
 		var highlighted bytes.Buffer
 		in := bytes.NewBuffer(text)
@@ -234,10 +220,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	// The filename is constructed in the following manner:
 	//
-	// - Chop off the last '=' (padding character) of the hash -- all the shas are the same length anyway so
-	//   we might as well get rid of the character that they all have in common.
-	// - Chop the first two characters off the front of the hash and use this as the directory to limit the
-	//	 number files in a single directory (git uses this trick for its object store).
+	// - Chop off the last '=' (padding character) of the hash -- all the
+	//   shas are the same length anyway so we might as well get rid of the
+	//   character that they all have in common.
+	// - Chop the first two characters off the front of the hash and use
+	//   this as the directory to limit the number of files in a single
+	//   directory (git uses this trick for its object store).
 	// - The full file format name is used as the extension.
 	//
 	// So for example:
@@ -263,7 +251,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// Otherwise file already exists
+	// Otherwise file already exists.
 	w.Write([]byte(logicalName))
 }
 
@@ -272,7 +260,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	w.Write(viewHtml)
+	w.Write(viewHTML)
 }
 
 func expire() {
@@ -358,7 +346,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	viewHtml = b.Bytes()
+	viewHTML = b.Bytes()
 
 	// Set up the server
 	mux := pat.New()
@@ -379,9 +367,8 @@ func main() {
 	}
 	log.Println("Now listening on", listenAddr, " TLS =", useTls)
 	if useTls {
-		err = server.ListenAndServeTLS(tlsCertFile, tlsKeyFile)
+		log.Fatal(server.ListenAndServeTLS(tlsCertFile, tlsKeyFile))
 	} else {
-		err = server.ListenAndServe()
+		log.Fatal(server.ListenAndServe())
 	}
-	log.Fatalf(err.Error())
 }
