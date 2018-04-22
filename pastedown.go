@@ -20,6 +20,7 @@ import (
 
 	"github.com/cespare/hutil/apachelog"
 	"github.com/gorilla/pat"
+	"github.com/microcosm-cc/bluemonday"
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 
 	"github.com/cespare/pastedown/lru"
@@ -46,11 +47,12 @@ var (
 )
 
 var (
-	validLanguages = make(map[string]struct{})
-	viewHTML       []byte
-	filenameRegex  = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
-	expiryMsg      string
-	renderCache    = lru.New(renderCacheSizeBytes)
+	validLanguages   = make(map[string]struct{})
+	bluemondayPolicy = bluemonday.UGCPolicy()
+	viewHTML         []byte
+	filenameRegex    = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
+	expiryMsg        string
+	renderCache      = lru.New(renderCacheSizeBytes)
 )
 
 func init() {
@@ -120,7 +122,7 @@ func render(text []byte, format string) []byte {
 		rendered = text
 	case "markdown":
 		html := blackfriday.Run(text)
-		rendered = html
+		rendered = bluemondayPolicy.SanitizeBytes(html)
 	default:
 		var highlighted bytes.Buffer
 		in := bytes.NewBuffer(text)
