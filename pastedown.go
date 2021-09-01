@@ -28,7 +28,7 @@ import (
 
 const (
 	staticDir                  = "public"
-	pygmentize                 = "./vendor/pygments/pygmentize"
+	pygmentize                 = "./thirdparty/pygments/pygmentize"
 	viewFile                   = "view.html"
 	expirationCheckPeriodHours = 1
 	renderCacheSizeBytes       = 20e6 // 20 MB

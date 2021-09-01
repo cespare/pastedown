@@ -13,7 +13,7 @@ styles:
 	sassc sass/style.scss public/style.css
 
 tarball: build styles
-	tar czf pastedown_built.tgz pastedown view.html vendor public files/about.markdown files/reference.markdown
+	tar czf pastedown_built.tgz pastedown view.html thirdparty public files/about.markdown files/reference.markdown
 
 fmt:
 	@gofmt -s -l -w .
