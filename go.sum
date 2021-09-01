@@ -1,0 +1,14 @@
+github.com/cespare/hutil v0.1.0 h1:jk0t0JFJwnfWiLpHt601OYTZgQxsXDk8a3+5SNvfBL4=
+github.com/cespare/hutil v0.1.0/go.mod h1:+HkWBMI2fhinEu3LedD6gV0IRw3WmmHM6lf03a5QqfY=
+github.com/gorilla/context v0.0.0-20160817184632-08b5f424b927 h1:XIP+oRz9JtkgvNAOZWhCV4Rvvuk+oCaockNRllzNjTQ=
+github.com/gorilla/context v0.0.0-20160817184632-08b5f424b927/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51q0aT7Yg=
+github.com/gorilla/mux v1.6.1 h1:KOwqsTYZdeuMacU7CxjMNYEKeBvLbxW+psodrbcEa3A=
+github.com/gorilla/mux v1.6.1/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
+github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1 h1:LqbZZ9sNMWVjeXS4NN5oVvhMjDyLhmA1LG86oSo+IqY=
+github.com/gorilla/pat v0.0.0-20180118222023-199c85a7f6d1/go.mod h1:YeAe0gNeiNT5hoiZRI4yiOky6jVdNvfO2N6Kav/HmxY=
+github.com/microcosm-cc/bluemonday v0.0.0-20180327211928-995366fdf961 h1:AGxHAyzem4hM995lX/dQbS+2tnf3P1DjLIadN7hzzbU=
+github.com/microcosm-cc/bluemonday v0.0.0-20180327211928-995366fdf961/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
+github.com/russross/blackfriday/v2 v2.1.0 h1:JIOH55/0cWyOuilr9/qlrm0BSXldqnqwMsf35Ld67mk=
+github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
+golang.org/x/net v0.0.0-20180420171651-5f9ae10d9af5 h1:ylIG3jIeS45kB0W95N19kS62fwermjMYLIyybf8xh9M=
+golang.org/x/net v0.0.0-20180420171651-5f9ae10d9af5/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=

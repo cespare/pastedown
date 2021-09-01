@@ -21,7 +21,7 @@ import (
 	"github.com/cespare/hutil/apachelog"
 	"github.com/gorilla/pat"
 	"github.com/microcosm-cc/bluemonday"
-	blackfriday "gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 
 	"github.com/cespare/pastedown/lru"
 )
