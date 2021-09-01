@@ -51,7 +51,6 @@ var (
 	bluemondayPolicy = bluemonday.UGCPolicy()
 	viewHTML         []byte
 	filenameRegex    = regexp.MustCompile(`^[\w\-]{27}\.\w+$`)
-	expiryMsg        string
 	renderCache      = lru.New(renderCacheSizeBytes)
 )
 
@@ -247,7 +246,7 @@ func expire() {
 		}
 		unexpired := false
 		for _, f := range files {
-			if time.Now().Sub(f.ModTime()).Hours() <= float64(expirationTimeHours) {
+			if time.Since(f.ModTime()).Hours() <= float64(expirationTimeHours) {
 				unexpired = true
 				continue
 			}
@@ -323,7 +322,7 @@ func main() {
 	if expirationTimeHours > 0 {
 		go func() {
 			ticker := time.NewTicker(expirationCheckPeriodHours * time.Hour)
-			for _ = range ticker.C {
+			for range ticker.C {
 				expire()
 			}
 		}()
