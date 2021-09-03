@@ -2,10 +2,6 @@
 
 An easy-to-use markdown-formatting pastebin.
 
-## Demo
-
-http://pastedown.ctrl-c.us
-
 ## Features
 
 * Markdown rendering and syntax highlighting
